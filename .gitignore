@@ -1,0 +1,13 @@
+# executables
+bsp
+scratchexe
+
+# macos / llvm stuff
+*.dSYM
+.DS_Store
+.cache/
+
+# object files / web build files
+obj/
+example/
+web/game.*

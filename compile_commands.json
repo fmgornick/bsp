@@ -1,0 +1,102 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-I/opt/homebrew/Cellar/raylib/5.5/include",
+      "-Iinclude",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/main.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-I/opt/homebrew/Cellar/raylib/5.5/include",
+      "-Iinclude",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/view_2d.o",
+      "src/view_2d.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/view_2d.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/view_2d.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-I/opt/homebrew/Cellar/raylib/5.5/include",
+      "-Iinclude",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/view_3d.o",
+      "src/view_3d.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/view_3d.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/view_3d.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-I/opt/homebrew/Cellar/raylib/5.5/include",
+      "-Iinclude",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/view_meta.o",
+      "src/view_meta.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/view_meta.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/view_meta.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-I/opt/homebrew/Cellar/raylib/5.5/include",
+      "-Iinclude",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/view_tree.o",
+      "src/view_tree.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/view_tree.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/view_tree.o"
+  }
+]
