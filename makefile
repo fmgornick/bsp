@@ -1,4 +1,4 @@
-FLAGS=-Os -Wall -Iinclude -I/usr/local/include/raylib
+FLAGS=-g -Wall -Iinclude -I/usr/local/include/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
 
 SRCS=$(wildcard src/*.c)

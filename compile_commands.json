@@ -3,9 +3,10 @@
     "arguments": [
       "/usr/bin/clang",
       "-c",
-      "-g",
+      "-Os",
       "-Wall",
       "-Iinclude",
+      "-I/usr/local/include/raylib",
       "-o",
       "obj/main.o",
       "src/main.c"
@@ -18,9 +19,10 @@
     "arguments": [
       "/usr/bin/clang",
       "-c",
-      "-g",
+      "-Os",
       "-Wall",
       "-Iinclude",
+      "-I/usr/local/include/raylib",
       "-o",
       "obj/view_2d.o",
       "src/view_2d.c"
@@ -33,9 +35,10 @@
     "arguments": [
       "/usr/bin/clang",
       "-c",
-      "-g",
+      "-Os",
       "-Wall",
       "-Iinclude",
+      "-I/usr/local/include/raylib",
       "-o",
       "obj/view_3d.o",
       "src/view_3d.c"
@@ -48,9 +51,10 @@
     "arguments": [
       "/usr/bin/clang",
       "-c",
-      "-g",
+      "-Os",
       "-Wall",
       "-Iinclude",
+      "-I/usr/local/include/raylib",
       "-o",
       "obj/view_meta.o",
       "src/view_meta.c"
@@ -63,9 +67,10 @@
     "arguments": [
       "/usr/bin/clang",
       "-c",
-      "-g",
+      "-Os",
       "-Wall",
       "-Iinclude",
+      "-I/usr/local/include/raylib",
       "-o",
       "obj/view_tree.o",
       "src/view_tree.c"

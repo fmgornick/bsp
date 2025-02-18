@@ -16,6 +16,6 @@
 
 #define EPSILON 1.0
 
-#define SAME_SIGN(x, y) ((x) >= 0) ^ ((y) < 0)
+#define SAME_SIGN(x, y) ((x) <= 0) == ((y) <= 0)
 
 #endif // BSP_UTILS_H_
