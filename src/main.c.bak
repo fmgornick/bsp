@@ -6,7 +6,9 @@
 #include "view_tree.h"
 #include <stdint.h>
 
-int main() {
+int
+main()
+{
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(WIDTH, HEIGHT, "csci 8442 bsp demo");
@@ -21,10 +23,12 @@ int main() {
     RenderTexture2D q3_screen = LoadRenderTexture(q_width, q_height);
     RenderTexture2D q4_screen = LoadRenderTexture(q_width, q_height);
 
-    Rectangle quadrant = {0.0f, 0.0f, (float)q_width, (float)-q_height};
+    Rectangle quadrant = { 0.0f, 0.0f, (float)q_width, (float)-q_height };
 
-    while (!WindowShouldClose()) {
-        if (IsWindowResized() && !IsWindowFullscreen()) {
+    while (!WindowShouldClose())
+    {
+        if (IsWindowResized() && !IsWindowFullscreen())
+        {
             width = GetScreenWidth();
             height = GetScreenHeight();
             q_width = width / 2;
@@ -50,10 +54,10 @@ int main() {
         BeginDrawing();
         ClearBackground(BG);
 
-        DrawTextureRec(q1_screen.texture, quadrant, (Vector2){q_width, 0}, BG);
-        DrawTextureRec(q2_screen.texture, quadrant, (Vector2){0, 0}, BG);
-        DrawTextureRec(q3_screen.texture, quadrant, (Vector2){0, q_height}, BG);
-        DrawTextureRec(q4_screen.texture, quadrant, (Vector2){q_width, q_height}, BG);
+        DrawTextureRec(q1_screen.texture, quadrant, (Vector2){ q_width, 0 }, BG);
+        DrawTextureRec(q2_screen.texture, quadrant, (Vector2){ 0, 0 }, BG);
+        DrawTextureRec(q3_screen.texture, quadrant, (Vector2){ 0, q_height }, BG);
+        DrawTextureRec(q4_screen.texture, quadrant, (Vector2){ q_width, q_height }, BG);
 
         DrawLine(0, q_height, width, q_height, FG);
         DrawLine(q_width, 0, q_width, height, FG);

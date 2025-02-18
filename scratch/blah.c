@@ -18,23 +18,23 @@ typedef struct Cell {
 Cell grid[ROWS][COLS];
 Cell *currentCell = &grid[0][0];
 
-void GridInit ();
-void DrawCell (Cell cell);
+void GridInit();
+void DrawCell(Cell cell);
 
 int32_t
-main (int32_t argc, char *argv[])
+main(int32_t argc, char *argv[])
 {
-    GridInit ();
-    InitWindow (WIDTH, HEIGHT, "blah");
+    GridInit();
+    InitWindow(WIDTH, HEIGHT, "blah");
 
-    while (!WindowShouldClose ())
+    while (!WindowShouldClose())
     {
-        BeginDrawing ();
-        ClearBackground (RAYWHITE);
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
 
-        Vector2 mouse = GetMousePosition ();
-        uint32_t i = mouse.x / cellWidth;
-        uint32_t j = mouse.y / cellHeight;
+        Vector2 mouse = GetMousePosition();
+        uint32_t i = mouse.y / cellHeight;
+        uint32_t j = mouse.x / cellWidth;
 
         if (i != currentCell->i || j != currentCell->j)
         {
@@ -45,14 +45,14 @@ main (int32_t argc, char *argv[])
 
         for (uint32_t i = 0; i < ROWS; i++)
             for (uint32_t j = 0; j < COLS; j++)
-                DrawCell (grid[i][j]);
+                DrawCell(grid[i][j]);
 
-        EndDrawing ();
+        EndDrawing();
     }
 }
 
 void
-GridInit ()
+GridInit()
 {
     for (uint32_t i = 0; i < ROWS; i++)
     {
@@ -69,12 +69,12 @@ GridInit ()
 }
 
 void
-DrawCell (Cell cell)
+DrawCell(Cell cell)
 {
     if (cell.active)
-        DrawRectangle (cell.i * cellWidth, cell.j * cellHeight, cellWidth, cellHeight, DARKGRAY);
+        DrawRectangle(cell.j * cellWidth, cell.i * cellHeight, cellWidth, cellHeight, LIGHTGRAY);
     else
-        DrawRectangle (cell.i * cellWidth, cell.j * cellHeight, cellWidth, cellHeight, LIGHTGRAY);
+        DrawRectangle(cell.j * cellWidth, cell.i * cellHeight, cellWidth, cellHeight, WHITE);
 
-    DrawRectangleLines (cell.i * cellWidth, cell.j * cellHeight, cellWidth, cellHeight, BLACK);
+    DrawRectangleLines(cell.j * cellWidth, cell.i * cellHeight, cellWidth, cellHeight, LIGHTGRAY);
 }

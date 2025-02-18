@@ -1,8 +1,15 @@
 BasedOnStyle: GNU
 IndentWidth: 4
+
 ColumnLimit: 132
 AlignEscapedNewlines: LeftWithLastLine
+
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterControlStatement: Always
   AfterFunction: true
+
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDefinitionName: false

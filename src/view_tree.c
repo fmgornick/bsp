@@ -2,7 +2,9 @@
 #include "bsp_utils.h"
 #include "raylib.h"
 
-void DrawViewTree() {
+void
+DrawViewTree()
+{
     ClearBackground(BG);
     DrawText("tree", Q_WIDTH, Q_HEIGHT, 20, FG);
 }
