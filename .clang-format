@@ -1,7 +1,7 @@
 BasedOnStyle: GNU
 IndentWidth: 4
 
-ColumnLimit: 132
+ColumnLimit: 160
 AlignEscapedNewlines: LeftWithLastLine
 
 BreakBeforeBraces: Custom
