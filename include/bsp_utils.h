@@ -5,6 +5,8 @@
 #define HEIGHT 720
 #define MAX_VERTICES 24
 
+#define MIN(x, y) (x) < (y) ? (x) : (y)
+#define MAX(x, y) (x) > (y) ? (x) : (y)
 #define SAME_SIGN(x, y) ((x) <= 0) == ((y) <= 0)
 
 #endif // BSP_UTILS_H_
