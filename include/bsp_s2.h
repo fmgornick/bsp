@@ -12,14 +12,6 @@ typedef struct S2_Scene {
     // polygon constructed by user
     Vector2 polygon[MAX_VERTICES];
     uint32_t numVertices;
-
-    RenderTexture polygonScreen;
-    RenderTexture treeScreen;
-
-    Vector2 polygonPosition;
-    Vector2 treePosition;
-
-    Rectangle splitScreenRect;
 } S2_Scene;
 
 void S2_DrawPolygon(S2_Scene *scene);

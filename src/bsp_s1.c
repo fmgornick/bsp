@@ -15,6 +15,7 @@ S1_Init(S1_Scene *scene)
 BSP_Stage
 S1_Render(S1_Scene *scene)
 {
+    BSP_Stage nextStage = S1_PENDING;
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
@@ -29,18 +30,17 @@ S1_Render(S1_Scene *scene)
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !S1_IntersectingPolygon(scene))
     {
         IVector2 newVertex = { scene->currentCell->j, scene->currentCell->i };
-        if (scene->numVertices >= 3 && IVector2DIsEqual(scene->polygon[0], newVertex))
-            return S1_COMPLETED;
-
-        if (scene->numVertices == 0 || !IVector2DIsEqual(newVertex, scene->polygon[scene->numVertices - 1]))
-            scene->polygon[scene->numVertices++] = newVertex;
 
         if (scene->numVertices == MAX_VERTICES)
-            return S1_FAILED;
+            nextStage = (IVector2DIsEqual(newVertex, scene->polygon[0])) ? S1_COMPLETED : S1_FAILED;
+        else if (scene->numVertices >= 3 && IVector2DIsEqual(newVertex, scene->polygon[0]))
+            nextStage = S1_COMPLETED;
+        else
+            scene->polygon[scene->numVertices++] = newVertex;
     }
 
     EndDrawing();
-    return S1_PENDING;
+    return nextStage;
 }
 
 BSP_Stage
@@ -166,7 +166,7 @@ S1_IntersectingPolygon(S1_Scene *scene)
         IVector2 sp = IVector2Subtract(p, s);
         IVector2 sq = IVector2Subtract(q, s);
 
-        /* edge cases ared covered, so we can now just do an intersection test */
+        /* edge cases are covered, so we can now just do an intersection test */
         if (!SAME_SIGN(IVector2Determinant(pq, ps), IVector2Determinant(pq, pt)) && !SAME_SIGN(IVector2Determinant(st, sp), IVector2Determinant(st, sq)))
             return true;
     }

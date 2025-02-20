@@ -1,7 +1,6 @@
 #include "bsp_s1.h"
 #include "bsp_s2.h"
 #include "bsp_stages.h"
-#include "bsp_vector.h"
 #include "raylib.h"
 
 int32_t

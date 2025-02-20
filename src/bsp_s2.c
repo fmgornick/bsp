@@ -23,23 +23,13 @@ S2_Init(IVector2 *polygon, uint32_t numVertices, S2_Scene *scene)
             yMax = polygon[i].y;
     }
 
-    /* TODO: add padding so polygon doesn't touch the edge */
-    double scale = MIN((double)WIDTH / (2 * (xMax - xMin)), (double)HEIGHT / (yMax - yMin));
-    double xPadding = (((double)WIDTH / 2) - (xMax - xMin) * scale) / 2;
-    double yPadding = (((double)HEIGHT) - (yMax - yMin) * scale) / 2;
+    double scale = MIN((double)WIDTH / (2 * (xMax - xMin)), (double)HEIGHT / (yMax - yMin)) * 0.9;
+    double xPadding = (WIDTH / 2.0f - (xMax - xMin) * scale) / 2.0f;
+    double yPadding = (HEIGHT - (yMax - yMin) * scale) / 2.0f;
 
     scene->numVertices = numVertices;
     for (uint32_t i = 0; i < numVertices; i++)
-        scene->polygon[i] = (Vector2){ (scale * (polygon[i].x - xMin)) + xPadding, (scale * (polygon[i].y - yMin)) + yPadding };
-
-    scene->polygonScreen = LoadRenderTexture(WIDTH / 2, HEIGHT);
-    scene->treeScreen = LoadRenderTexture(WIDTH / 2, HEIGHT);
-
-    scene->polygonPosition = (Vector2){ 0.0f, 0.0f };
-    scene->treePosition = (Vector2){ WIDTH / 2.0f, 0.0f };
-
-    /* need to build a flipped rectangle for the split view */
-    scene->splitScreenRect = (Rectangle){ 0.0f, 0.0f, (float)WIDTH, (float)-HEIGHT };
+        scene->polygon[i] = (Vector2){ scale * (polygon[i].x - xMin) + xPadding, scale * (polygon[i].y - yMin) + yPadding };
 
     return S2_PENDING;
 }
@@ -47,18 +37,9 @@ S2_Init(IVector2 *polygon, uint32_t numVertices, S2_Scene *scene)
 BSP_Stage
 S2_Render(S2_Scene *scene)
 {
-    BeginTextureMode(scene->polygonScreen);
-    ClearBackground(RAYWHITE);
-    S2_DrawPolygon(scene);
-    EndTextureMode();
-
-    BeginTextureMode(scene->treeScreen);
-    ClearBackground(RAYWHITE);
-    EndTextureMode();
-
     BeginDrawing();
-    DrawTextureRec(scene->polygonScreen.texture, scene->splitScreenRect, scene->polygonPosition, WHITE);
-    DrawTextureRec(scene->treeScreen.texture, scene->splitScreenRect, scene->treePosition, WHITE);
+    ClearBackground(WHITE);
+    S2_DrawPolygon(scene);
     EndDrawing();
 
     return S2_PENDING;
