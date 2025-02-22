@@ -3,8 +3,8 @@
 #include "bsp_stages.h"
 #include "raylib.h"
 
-int32_t
-main(int32_t argc, char *argv[])
+isize
+main(isize argc, char *argv[])
 {
     BSP_Stage stage = S1_INITIALIZING;
     S1_Scene s1 = { 0 };
@@ -45,4 +45,5 @@ main(int32_t argc, char *argv[])
             TraceLog(LOG_ERROR, "uh oh");
         }
     }
+    return 0;
 }

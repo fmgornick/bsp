@@ -15,12 +15,19 @@ wasm: $(WEBOBJS)
 	@echo "\n\033[01;32m  URL: http://localhost:8442/game.html  \033[00m\n"
 	@python3 -m http.server --directory web 8442
 
+# # run raylib example files on web (usage: make ex<example number>)
+# ex%: examples/%.c
+# 	@mkdir -p example
+# 	emcc -o example/game.html $(FLAGS) $< lib/libraylib.a $(EMCC_FLAGS)
+# 	@echo "\n\033[01;32m  URL: http://localhost:8080/game.html  \033[00m\n"
+# 	@python3 -m http.server --directory example 8080
+
 # run raylib example files on web (usage: make ex<example number>)
 ex%: examples/%.c
 	@mkdir -p example
-	emcc -o example/game.html $(FLAGS) $< lib/libraylib.a $(EMCC_FLAGS)
-	@echo "\n\033[01;32m  URL: http://localhost:8080/game.html  \033[00m\n"
-	@python3 -m http.server --directory example 8080
+	clang -o example/$@ $(FLAGS) $< -lraylib
+	@example/$@
+
 
 obj/%.o: src/%.c
 	@mkdir -p obj

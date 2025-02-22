@@ -3,7 +3,6 @@
 #include "bsp_utils.h"
 #include "bsp_vector.h"
 #include "raylib.h"
-#include <stdint.h>
 
 BSP_Stage
 S1_Init(S1_Scene *scene)
@@ -68,8 +67,8 @@ S1_RenderFailure(S1_Scene *scene)
 void
 S1_GridInit(S1_Scene *scene)
 {
-    for (uint32_t i = 0; i < ROWS; i++)
-        for (uint32_t j = 0; j < COLS; j++)
+    for (usize i = 0; i < ROWS; i++)
+        for (usize j = 0; j < COLS; j++)
             scene->grid[i][j] = (Cell){ i, j, false };
     scene->currentCell = &scene->grid[0][0];
 }
@@ -77,9 +76,9 @@ S1_GridInit(S1_Scene *scene)
 void
 S1_DrawCells(S1_Scene *scene)
 {
-    for (uint32_t i = 0; i < ROWS; i++)
+    for (usize i = 0; i < ROWS; i++)
     {
-        for (uint32_t j = 0; j < COLS; j++)
+        for (usize j = 0; j < COLS; j++)
         {
             Cell cell = scene->grid[i][j];
             if (cell.active)
@@ -96,8 +95,8 @@ void
 S1_UpdateActiveCell(S1_Scene *scene)
 {
     Vector2 mouse = GetMousePosition();
-    int32_t i = mouse.y / CELL_HEIGHT;
-    int32_t j = mouse.x / CELL_WIDTH;
+    i32 i = mouse.y / CELL_HEIGHT;
+    i32 j = mouse.x / CELL_WIDTH;
 
     if (i != scene->currentCell->i || j != scene->currentCell->j)
     {
@@ -115,7 +114,7 @@ S1_DrawPolygon(S1_Scene *scene)
 {
     if (scene->numVertices >= 2)
     {
-        for (uint32_t i = 0; i < scene->numVertices - 1; i++)
+        for (usize i = 0; i < scene->numVertices - 1; i++)
         {
             Vector2 p = { scene->polygon[i].x * CELL_WIDTH + CELL_WIDTH / 2.0f, scene->polygon[i].y * CELL_HEIGHT + CELL_HEIGHT / 2.0f };
             Vector2 q = { scene->polygon[i + 1].x * CELL_WIDTH + CELL_WIDTH / 2.0f, scene->polygon[i + 1].y * CELL_HEIGHT + CELL_HEIGHT / 2.0f };
@@ -146,7 +145,7 @@ S1_IntersectingPolygon(S1_Scene *scene)
     IVector2 p = scene->polygon[scene->numVertices - 1];
     IVector2 q = (IVector2){ scene->currentCell->j, scene->currentCell->i };
 
-    for (uint32_t i = 0; i < scene->numVertices - 1; i++)
+    for (usize i = 0; i < scene->numVertices - 1; i++)
     {
         IVector2 s = scene->polygon[i];
         IVector2 t = scene->polygon[i + 1];
@@ -180,8 +179,8 @@ S1_DrawMessage(char *msg, Color fg, Color bg)
     DrawRectangle(0, 3 * (HEIGHT / 4), WIDTH, HEIGHT / 4, Fade(bg, 0.5));
 
     Vector2 textSize = MeasureTextEx(GetFontDefault(), msg, 20, 1.0f);
-    uint32_t xPos = (WIDTH - textSize.x) / 2;
-    uint32_t yPos = 3 * (HEIGHT / 4.0f) + (HEIGHT / 4.0f - textSize.y) / 2;
+    u32 xPos = (WIDTH - textSize.x) / 2;
+    u32 yPos = 3 * (HEIGHT / 4.0f) + (HEIGHT / 4.0f - textSize.y) / 2;
 
     DrawText(msg, xPos, yPos, 20, fg);
 }
