@@ -6,7 +6,6 @@
 #include "bsp_vector.h"
 #include "raylib.h"
 #include <stdbool.h>
-#include <stdint.h>
 
 #define ROWS 36
 #define COLS 64
@@ -15,8 +14,8 @@
 #define CELL_HEIGHT 20 // dependent on (HEIGHT / ROWS)
 
 typedef struct Cell {
-    int32_t i;   // cell row
-    int32_t j;   // cell column
+    i32 i;       // cell row
+    i32 j;       // cell column
     bool active; // true if mouse hovering over cell
 } Cell;
 
@@ -27,7 +26,7 @@ typedef struct S1_Scene {
 
     // polygon constructed by user
     IVector2 polygon[MAX_VERTICES];
-    uint32_t numVertices;
+    u32 numVertices;
 } S1_Scene;
 
 void S1_GridInit(S1_Scene *scene);

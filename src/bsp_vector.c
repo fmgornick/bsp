@@ -49,17 +49,17 @@ IVector2Divide(IVector2 v1, IVector2 v2)
     return result;
 }
 
-int32_t
+i32
 IVector2DotProduct(IVector2 v1, IVector2 v2)
 {
-    int32_t result = (v1.x * v2.x + v1.y * v2.y);
+    i32 result = (v1.x * v2.x + v1.y * v2.y);
     return result;
 }
 
-int32_t
+i32
 IVector2Determinant(IVector2 v1, IVector2 v2)
 {
-    int32_t result = (v1.x * v2.y - v1.y * v2.x);
+    i32 result = (v1.x * v2.y - v1.y * v2.x);
     return result;
 }
 

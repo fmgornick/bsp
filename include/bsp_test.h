@@ -11,7 +11,7 @@ IVector2 trianglePolygon[MAX_VERTICES] = {
     { .x = 0, .y = 0 },   { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 }, { .x = 0, .y = 0 }, { .x = 0, .y = 0 },
     { .x = 0, .y = 0 },   { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 }, { .x = 0, .y = 0 }, { .x = 0, .y = 0 },
 };
-uint32_t triangleNumVertices = 3;
+u32 triangleNumVertices = 3;
 
 /* square */
 IVector2 squarePolygon[MAX_VERTICES] = {
@@ -20,7 +20,7 @@ IVector2 squarePolygon[MAX_VERTICES] = {
     { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },  { .x = 0, .y = 0 }, { .x = 0, .y = 0 },
     { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },  { .x = 0, .y = 0 }, { .x = 0, .y = 0 },
 };
-uint32_t squareNumVertices = 4;
+u32 squareNumVertices = 4;
 
 /* complex polygon, uses all available vertices */
 IVector2 complexPolygon[MAX_VERTICES] = {
@@ -29,7 +29,7 @@ IVector2 complexPolygon[MAX_VERTICES] = {
     { .x = 63, .y = 29 }, { .x = 53, .y = 18 }, { .x = 62, .y = 10 }, { .x = 49, .y = 10 }, { .x = 49, .y = 1 },  { .x = 44, .y = 16 },
     { .x = 50, .y = 21 }, { .x = 39, .y = 18 }, { .x = 35, .y = 2 },  { .x = 27, .y = 23 }, { .x = 29, .y = 4 },  { .x = 23, .y = 4 },
 };
-uint32_t complexNumVertices = 24;
+u32 complexNumVertices = 24;
 
 /* convex polygon, uses lots of vertices, but no concavities */
 IVector2 convexPolygon[MAX_VERTICES] = {
@@ -38,7 +38,7 @@ IVector2 convexPolygon[MAX_VERTICES] = {
     { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
     { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
 };
-uint32_t convexNumVertices = 12;
+u32 convexNumVertices = 12;
 
 /* normal polygon, fills texture width */
 IVector2 fatPolygon[MAX_VERTICES] = {
@@ -47,7 +47,7 @@ IVector2 fatPolygon[MAX_VERTICES] = {
     { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
     { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
 };
-uint32_t fatNumVertices = 12;
+u32 fatNumVertices = 12;
 
 /* tall polygon, fills texture height */
 IVector2 tallPolygon[MAX_VERTICES] = {
@@ -56,6 +56,6 @@ IVector2 tallPolygon[MAX_VERTICES] = {
     { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
     { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
 };
-uint32_t tallNumVertices = 8;
+u32 tallNumVertices = 8;
 
 #endif // BSP_TEST_H_

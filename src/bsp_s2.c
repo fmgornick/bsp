@@ -1,5 +1,6 @@
 #include "bsp_s2.h"
 #include "bsp_stages.h"
+#include "bsp_tree.h"
 #include "bsp_utils.h"
 #include "raylib.h"
 #include <limits.h>
@@ -30,15 +31,45 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
     for (usize i = 0; i < numVertices; i++)
         scene->polygon[i] = (Vector2){ scale * (polygon[i].x - xMin) + xPadding, scale * (polygon[i].y - yMin) + yPadding };
 
+    scene->tree = NewTree();
+
     return S2_PENDING;
 }
 
 BSP_Stage
 S2_Render(S2_Scene *scene)
 {
+    BSP_Tree *tree = scene->tree;
+    if (IsKeyPressed(KEY_LEFT))
+    {
+        if (!tree->active->left)
+        {
+            tree->active->left = NewNode(tree, tree->active);
+            UpdateTree(tree);
+        }
+        tree->active = tree->active->left;
+    }
+
+    if (IsKeyPressed(KEY_RIGHT))
+    {
+        if (!tree->active->right)
+        {
+            tree->active->right = NewNode(tree, tree->active);
+            UpdateTree(tree);
+        }
+        tree->active = tree->active->right;
+    }
+
+    if (IsKeyPressed(KEY_UP))
+    {
+        if (tree->active->parent)
+            tree->active = tree->active->parent;
+    }
+
     BeginDrawing();
     ClearBackground(WHITE);
-    S2_DrawPolygon(scene);
+    DrawTree(tree);
+    /* S2_DrawPolygon(scene); */
     EndDrawing();
 
     return S2_PENDING;
