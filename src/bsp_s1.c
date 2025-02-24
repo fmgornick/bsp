@@ -166,7 +166,7 @@ S1_IntersectingPolygon(S1_Scene *scene)
         IVector2 sq = IVector2Subtract(q, s);
 
         /* edge cases are covered, so we can now just do an intersection test */
-        if (!SAME_SIGN(IVector2Determinant(pq, ps), IVector2Determinant(pq, pt)) && !SAME_SIGN(IVector2Determinant(st, sp), IVector2Determinant(st, sq)))
+        if (sign(IVector2Determinant(pq, ps)) != sign(IVector2Determinant(pq, pt)) && sign(IVector2Determinant(st, sp)) != sign(IVector2Determinant(st, sq)))
             return true;
     }
 

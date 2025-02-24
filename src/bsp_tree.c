@@ -27,7 +27,9 @@ FreeTree(BSP_Tree *tree)
 void
 UpdateTree(BSP_Tree *tree)
 {
-    f32 radius = (f32)WIDTH / (tree->size * 2.0f);
+    u32 shorter = min(WIDTH, HEIGHT);
+    f32 radius = (f32)shorter / max(tree->height * 2, tree->size);
+
     BSP_Node *node = MinNode(tree->root);
     u32 i = 0;
     while (node)

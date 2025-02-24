@@ -1,13 +1,14 @@
 #ifndef BSP_UTILS_H_
 #define BSP_UTILS_H_
 
-#define WIDTH 1280
+#define WIDTH 720
 #define HEIGHT 720
 #define MAX_VERTICES 24
 
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define SAME_SIGN(x, y) ((x) <= 0) == ((y) <= 0)
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#define clamp(a, lower, upper) min(max(a, lower), upper)
+#define sign(v) (((v) > 0) - ((v) < 0))
 
 typedef int i32;
 typedef long long int i64;

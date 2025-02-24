@@ -3,6 +3,7 @@
 #include "bsp_tree.h"
 #include "bsp_utils.h"
 #include "raylib.h"
+#include "raymath.h"
 #include <limits.h>
 
 BSP_Stage
@@ -23,7 +24,7 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
             yMax = polygon[i].y;
     }
 
-    f64 scale = MIN((f64)WIDTH / (2 * (xMax - xMin)), (f64)HEIGHT / (yMax - yMin)) * 0.9;
+    f64 scale = min((f64)WIDTH / (2 * (xMax - xMin)), (f64)HEIGHT / (yMax - yMin)) * 0.9;
     f64 xPadding = (WIDTH / 2.0f - (xMax - xMin) * scale) / 2.0f;
     f64 yPadding = (HEIGHT - (yMax - yMin) * scale) / 2.0f;
 
@@ -32,6 +33,7 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
         scene->polygon[i] = (Vector2){ scale * (polygon[i].x - xMin) + xPadding, scale * (polygon[i].y - yMin) + yPadding };
 
     scene->tree = NewTree();
+    scene->camera = (Camera2D){ .zoom = 1.0f };
 
     return S2_PENDING;
 }
@@ -66,10 +68,31 @@ S2_Render(S2_Scene *scene)
             tree->active = tree->active->parent;
     }
 
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    {
+        Vector2 delta = GetMouseDelta();
+        delta = Vector2Scale(delta, -1.0f / scene->camera.zoom);
+        scene->camera.target = Vector2Add(scene->camera.target, delta);
+    }
+
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0)
+    {
+        Vector2 mouseWorldPos = GetScreenToWorld2D(GetMousePosition(), scene->camera);
+        scene->camera.offset = GetMousePosition();
+        scene->camera.target = mouseWorldPos;
+        float scaleFactor = 1.0f + (0.25f * fabsf(wheel));
+        if (wheel < 0)
+            scaleFactor = 1.0f / scaleFactor;
+        scene->camera.zoom = Clamp(scene->camera.zoom * scaleFactor, 0.125f, 64.0f);
+    }
+
     BeginDrawing();
+    BeginMode2D(scene->camera);
     ClearBackground(WHITE);
     DrawTree(tree);
     /* S2_DrawPolygon(scene); */
+    EndMode2D();
     EndDrawing();
 
     return S2_PENDING;

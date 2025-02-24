@@ -9,10 +9,9 @@
 #include <stdbool.h>
 
 typedef struct S2_Scene {
-    // polygon constructed by user
+    Camera2D camera;
     Vector2 polygon[MAX_VERTICES];
     u32 numVertices;
-
     BSP_Tree *tree;
 } S2_Scene;
 
