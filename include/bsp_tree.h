@@ -1,38 +1,45 @@
 #ifndef BSP_TREE_H_
 #define BSP_TREE_H_
 
+#include "bsp_segment.h"
 #include "bsp_utils.h"
 #include "raylib.h"
+#include <stdbool.h>
 
-typedef struct BSP_Node {
-    struct BSP_Node *left;
-    struct BSP_Node *right;
-    struct BSP_Node *parent;
+typedef struct BspNode {
+    struct BspNode *left;
+    struct BspNode *right;
+    struct BspNode *parent;
 
     Vector2 pos;
     f32 radius;
     u32 depth;
-} BSP_Node;
 
-typedef struct BSP_Tree {
-    BSP_Node *root;
-    BSP_Node *active;
-    u32 size;
-    u32 height;
-} BSP_Tree;
+    Segment *segments;
+    usize numSegments;
+} BspNode;
 
-BSP_Tree *NewTree();
-void FreeTree(BSP_Tree *tree);
-void UpdateTree(BSP_Tree *tree);
-void DrawTree(BSP_Tree *tree);
+typedef struct BspTree {
+    BspNode *root;
+    BspNode *active;
+    usize size;
+    usize height;
 
-BSP_Node *NewNode(BSP_Tree *tree, BSP_Node *parent);
-void FreeNode(BSP_Node *node);
-void DrawNode(BSP_Node *node);
+    Region region;
+} BspTree;
 
-BSP_Node *MinNode(BSP_Node *node);
-BSP_Node *MaxNode(BSP_Node *node);
-BSP_Node *PrevNode(BSP_Node *node);
-BSP_Node *SuccNode(BSP_Node *node);
+BspNode *BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent);
+BspTree *BuildBspTree(Segment *segments, usize len, Region region);
+void FreeBspTree(BspTree *tree);
+void FreeBspNode(BspNode *node);
+
+BspNode *MinNode(BspNode *root);
+BspNode *MaxNode(BspNode *root);
+BspNode *PrevNode(BspNode *node);
+BspNode *SuccNode(BspNode *node);
+
+void UpdateTree(BspTree *tree);
+void DrawTree(BspTree *tree);
+void DrawNode(BspNode *node);
 
 #endif // BSP_TREE_H_

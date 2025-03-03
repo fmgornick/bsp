@@ -24,18 +24,26 @@ S1_Render(S1_Scene *scene)
 
     DrawText(TextFormat("remaining vertices: %d", MAX_VERTICES - scene->numVertices), 10, 10, 20, BLACK);
     if (scene->numVertices == 0)
+    {
         S1_DrawMessage("select cells to create simple polygon (don't run out)", BLACK, BLUE);
+    }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !S1_IntersectingPolygon(scene))
     {
         IVector2 newVertex = { scene->currentCell->j, scene->currentCell->i };
 
         if (scene->numVertices == MAX_VERTICES)
+        {
             nextStage = (IVector2DIsEqual(newVertex, scene->polygon[0])) ? S1_COMPLETED : S1_FAILED;
+        }
         else if (scene->numVertices >= 3 && IVector2DIsEqual(newVertex, scene->polygon[0]))
+        {
             nextStage = S1_COMPLETED;
+        }
         else
+        {
             scene->polygon[scene->numVertices++] = newVertex;
+        }
     }
 
     EndDrawing();
@@ -82,10 +90,13 @@ S1_DrawCells(S1_Scene *scene)
         {
             Cell cell = scene->grid[i][j];
             if (cell.active)
+            {
                 DrawRectangle(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, LIGHTGRAY);
+            }
             else
+            {
                 DrawRectangle(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, WHITE);
-
+            }
             DrawRectangleLines(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, LIGHTGRAY);
         }
     }
@@ -127,10 +138,8 @@ S1_DrawPolygon(S1_Scene *scene)
                       scene->polygon[scene->numVertices - 1].y * CELL_HEIGHT + CELL_HEIGHT / 2.0f };
         Vector2 q = { scene->currentCell->j * CELL_WIDTH + CELL_WIDTH / 2.0f, scene->currentCell->i * CELL_HEIGHT + CELL_HEIGHT / 2.0f };
 
-        if (S1_IntersectingPolygon(scene))
-            DrawLineEx(p, q, 2.0f, RED);
-        else
-            DrawLineEx(p, q, 2.0f, LIGHTGRAY);
+        if (S1_IntersectingPolygon(scene)) DrawLineEx(p, q, 2.0f, RED);
+        else DrawLineEx(p, q, 2.0f, LIGHTGRAY);
     }
 }
 
@@ -138,8 +147,7 @@ bool
 S1_IntersectingPolygon(S1_Scene *scene)
 {
     /* can't intersect if there's no line to intersect */
-    if (scene->numVertices <= 1)
-        return false;
+    if (scene->numVertices <= 1) return false;
 
     /* line from last chosen square to the square containing our cursor */
     IVector2 p = scene->polygon[scene->numVertices - 1];
@@ -153,12 +161,10 @@ S1_IntersectingPolygon(S1_Scene *scene)
         IVector2 st = IVector2Subtract(t, s);
 
         /* make sure we don't make a line on top of the last one */
-        if (i == scene->numVertices - 2)
-            return (IVector2Determinant(pq, st) == 0 && IVector2DotProduct(pq, st) < 0);
+        if (i == scene->numVertices - 2) return (IVector2Determinant(pq, st) == 0 && IVector2DotProduct(pq, st) < 0);
 
         /* don't check the first line for intersections if we form a loop */
-        if (i == 0 && IVector2DIsEqual(q, s))
-            continue;
+        if (i == 0 && IVector2DIsEqual(q, s)) continue;
 
         IVector2 ps = IVector2Subtract(s, p);
         IVector2 pt = IVector2Subtract(t, p);

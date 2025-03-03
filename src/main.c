@@ -1,12 +1,13 @@
 #include "bsp_s1.h"
 #include "bsp_s2.h"
 #include "bsp_stages.h"
+#include "bsp_test.h"
 #include "raylib.h"
 
 isize
 main(isize argc, char *argv[])
 {
-    BSP_Stage stage = S2_INITIALIZING;
+    BSP_Stage stage = S1_INITIALIZING;
     S1_Scene s1 = { 0 };
     S2_Scene s2 = { 0 };
 
@@ -34,7 +35,7 @@ main(isize argc, char *argv[])
             break;
 
         case S2_INITIALIZING:
-            stage = S2_Init(s1.polygon, s1.numVertices, &s2);
+            stage = S2_Init(complexPolygon, complexNumVertices, &s2);
             break;
 
         case S2_PENDING:
