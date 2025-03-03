@@ -21,5 +21,6 @@ typedef struct Hyperplane {
 } Hyperplane;
 
 Segment *BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size);
+void DrawSegments(Segment *segments, usize len);
 
 #endif // BSP_SEGMENT_H_

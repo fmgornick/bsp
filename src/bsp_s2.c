@@ -33,9 +33,8 @@ S2_Render(S2_Scene *scene)
     BeginDrawing();
     ClearBackground(WHITE);
     DrawTree(scene->tree);
-    S2_DrawSegments(scene);
+    DrawSegments(scene->segments, scene->numSegments);
     EndDrawing();
-
     return S2_PENDING;
 }
 
@@ -43,16 +42,6 @@ BSP_Stage
 S2_RenderFailure(S2_Scene *scene)
 {
     return S2_FAILED;
-}
-
-void
-S2_DrawSegments(S2_Scene *scene)
-{
-    for (usize i = 0; i < scene->numSegments; i++)
-    {
-        Segment s = scene->segments[i];
-        DrawLineEx((Vector2){ s.p1.x, s.p1.y }, (Vector2){ s.p2.x, s.p2.y }, 2.0f, BLACK);
-    }
 }
 
 void

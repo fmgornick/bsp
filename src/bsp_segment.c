@@ -50,3 +50,13 @@ BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
     *size = numSegments;
     return segments;
 }
+
+void
+DrawSegments(Segment *segments, usize len)
+{
+    for (usize i = 0; i < len; i++)
+    {
+        Segment s = segments[i];
+        DrawLineEx((Vector2){ s.p1.x, s.p1.y }, (Vector2){ s.p2.x, s.p2.y }, 2.0f, BLACK);
+    }
+}

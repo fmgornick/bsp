@@ -7,7 +7,7 @@
 isize
 main(isize argc, char *argv[])
 {
-    BSP_Stage stage = S1_INITIALIZING;
+    BSP_Stage stage = S2_INITIALIZING;
     S1_Scene s1 = { 0 };
     S2_Scene s2 = { 0 };
 
