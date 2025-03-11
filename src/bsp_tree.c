@@ -1,17 +1,11 @@
 #include "bsp_tree.h"
+#include "bsp_segment.h"
+#include "bsp_utils.h"
+#include "f64_vector.h"
 #include "raylib.h"
+#include "raymath.h"
 #include <stdlib.h>
 #include <string.h>
-
-Hyperplane
-hyperplane(Segment s)
-{
-    return (Hyperplane){
-        .a = s.p2.y - s.p1.y,
-        .b = s.p1.x - s.p2.x,
-        .c = (s.p2.x * s.p1.y) - (s.p1.x * s.p2.y),
-    };
-}
 
 BspNode *
 BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent)
@@ -38,81 +32,66 @@ BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent)
     }
     else
     {
-        Segment splitSegment = segments[0];
         /* use free split as partitioning segment if one exists */
-        for (int i = 0; i < len; i++)
-        {
-            if (segments[i].splitLeft && segments[i].splitRight)
-            {
-                splitSegment = segments[i];
-                break;
-            }
-        }
+        usize splitIdx = 0;
+        for (usize i = 0; i < len; i++)
+            if (segments[i].splitLeft && segments[i].splitRight) splitIdx = i;
 
-        Hyperplane h = hyperplane(splitSegment);
-        usize numLeft = 0, numRight = 0, numMiddle = 1;
+        Segment split = segments[splitIdx];
+        DVector2 splitVec = DVector2Subtract(split.right, split.left);
+
         /* first pass - find size needed for sub-trees */
+        usize numBehind = 0, numInFront = 0, numInside = 1;
         for (usize i = 1; i < len; i++)
         {
             Segment si = segments[i];
+            f64 leftSide = DVector2Determinant(splitVec, DVector2Subtract(si.left, split.left));
+            f64 rightSide = DVector2Determinant(splitVec, DVector2Subtract(si.right, split.left));
 
-            /* to check if segment lies exactly inside hyperplane we need perfect precision so we use integer endpoints
-             * (these aren't the "true" endpoints, but will suffice for checking if segment si lies fully inside hyperplane h) */
-            i32 p1Endpoint = h.a * si.p1.x + h.b * si.p1.y + h.c;
-            i32 p2Endpoint = h.a * si.p2.x + h.b * si.p2.y + h.c;
-            if (p1Endpoint == 0 && p2Endpoint == 0) numMiddle += 1;
-
+            if (babs(leftSide) < EPSILON && babs(rightSide) < EPSILON) numInside += 1;
+            else if (leftSide - EPSILON < 0 && rightSide - EPSILON < 0) numBehind += 1;
+            else if (leftSide + EPSILON > 0 && rightSide + EPSILON > 0) numInFront += 1;
             else
             {
-                f32 leftEndpoint = h.a * si.leftEndpoint.x + h.b * si.leftEndpoint.y + h.c;
-                f32 rightEndpoint = h.a * si.rightEndpoint.x + h.b * si.rightEndpoint.y + h.c;
-
-                if (leftEndpoint < 0 && rightEndpoint < 0) numLeft += 1;
-                else if (leftEndpoint > 0 && rightEndpoint > 0) numRight += 1;
-                else
-                {
-                    numLeft += 1;
-                    numRight += 1;
-                }
+                numBehind += 1;
+                numInFront += 1;
             }
         }
 
-        node->segments = (Segment *)malloc(numMiddle * sizeof(Segment));
-        node->segments[0] = splitSegment;
-        node->numSegments = numMiddle;
+        node->segments = (Segment *)malloc(numInside * sizeof(Segment));
+        node->segments[0] = split;
+        node->numSegments = numInside;
 
-        Segment *sLeft, *sRight;
-        if (numLeft > 0) sLeft = (Segment *)malloc(numLeft * sizeof(Segment));
-        if (numRight > 0) sRight = (Segment *)malloc(numRight * sizeof(Segment));
-        usize idxLeft = 0, idxRight = 0, idxMiddle = 1;
+        Segment *segmentsBehind, *segmentsInFront;
+        if (numBehind > 0) segmentsBehind = (Segment *)malloc(numBehind * sizeof(Segment));
+        if (numInFront > 0) segmentsInFront = (Segment *)malloc(numInFront * sizeof(Segment));
+        usize behindIdx = 0, inFrontIdx = 0, insideIdx = 1;
         /* second pass - add segments to middle node and recurse into left/right children */
         for (usize i = 1; i < len; i++)
         {
             Segment si = segments[i];
+            f64 leftSide = DVector2Determinant(splitVec, DVector2Subtract(si.left, split.left));
+            f64 rightSide = DVector2Determinant(splitVec, DVector2Subtract(si.right, split.left));
 
-            i32 p1Endpoint = h.a * si.p1.x + h.b * si.p1.y + h.c;
-            i32 p2Endpoint = h.a * si.p2.x + h.b * si.p2.y + h.c;
-            if (p1Endpoint == 0 && p2Endpoint == 0) node->segments[idxMiddle++] = si;
+            /* both endpoints inside split segment => add si to current node segment list */
+            if (babs(leftSide) < EPSILON && babs(rightSide) < EPSILON) node->segments[insideIdx++] = si;
 
             else
             {
-                f32 leftEndpoint = h.a * si.leftEndpoint.x + h.b * si.leftEndpoint.y + h.c;
-                f32 rightEndpoint = h.a * si.rightEndpoint.x + h.b * si.rightEndpoint.y + h.c;
+                /* both endpoints behind split segment => add si to left segment list */
+                if (leftSide - EPSILON < 0 && rightSide - EPSILON < 0) segmentsBehind[behindIdx++] = si;
 
-                /* both endpoints on left side of hyperplane => add si to left segment list */
-                if (leftEndpoint < 0 && rightEndpoint < 0) sLeft[idxLeft++] = si;
+                /* both endpoints in front of split segment => add si to right segment list */
+                else if (leftSide + EPSILON > 0 && rightSide + EPSILON > 0) segmentsInFront[inFrontIdx++] = si;
 
-                /* both endpoints on right side of hyperplane => add si to right segment list */
-                else if (leftEndpoint > 0 && rightEndpoint > 0) sRight[idxRight++] = si;
-
-                /* current segmenst is split by h =>
-                 *  - find intersection point of segment si with hyperplane h
+                /* current segmenst is bisected by splitting line =>
+                 *  - find intersection point of segment si with splitting line
                  *  - insert split subsegments into respective left/right segment lists
                  *  - update bools for each subsegment for "free split" check in recursive call */
                 else
                 {
-                    sLeft[idxLeft] = segments[i];
-                    sRight[idxRight] = segments[i];
+                    segmentsBehind[behindIdx] = segments[i];
+                    segmentsInFront[inFrontIdx] = segments[i];
 
                     /*
                      * a1 * x + b1 * y + c1 = 0
@@ -124,25 +103,41 @@ BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent)
                      * =>  |x|   |a1 b1|-1 |-c1|
                      *     |y| = |a2 b2|   |-c2|
                      * */
-                    Hyperplane hi = hyperplane(si);
-                    Vector2 intersection = {
-                        .x = (f32)((h.b * hi.c) - (hi.b * h.c)) / ((h.a * hi.b) - (hi.a * h.b)),
-                        .y = (f32)((hi.a * h.c) - (h.a * hi.c)) / ((h.a * hi.b) - (hi.a * h.b)),
+                    f64 a1 = split.right.y - split.left.y;
+                    f64 b1 = split.left.x - split.right.x;
+                    f64 c1 = (split.right.x * split.left.y) - (split.left.x * split.right.y);
+                    f64 a2 = si.right.y - si.left.y;
+                    f64 b2 = si.left.x - si.right.x;
+                    f64 c2 = (si.right.x * si.left.y) - (si.left.x * si.right.y);
+                    DVector2 intersection = {
+                        .x = (f64)((b1 * c2) - (b2 * c1)) / ((a1 * b2) - (b1 * a2)),
+                        .y = (f64)((a2 * c1) - (a1 * c2)) / ((a1 * b2) - (b1 * a2)),
                     };
 
-                    sLeft[idxLeft].splitRight = true;
-                    sRight[idxRight].splitLeft = true;
-                    sLeft[idxLeft].rightEndpoint = intersection;
-                    sRight[idxRight].leftEndpoint = intersection;
+                    if (leftSide < rightSide)
+                    {
+                        segmentsBehind[behindIdx].splitRight = true;
+                        segmentsInFront[inFrontIdx].splitLeft = true;
+                        segmentsBehind[behindIdx].right = intersection;
+                        segmentsInFront[inFrontIdx].left = intersection;
+                    }
+                    else
+                    {
+                        segmentsBehind[behindIdx].splitLeft = true;
+                        segmentsInFront[inFrontIdx].splitRight = true;
+                        segmentsBehind[behindIdx].left = intersection;
+                        segmentsInFront[inFrontIdx].right = intersection;
+                    }
 
-                    idxLeft += 1;
-                    idxRight += 1;
+                    behindIdx += 1;
+                    inFrontIdx += 1;
                 }
             }
         }
 
-        node->left = BuildBspNode(sLeft, numLeft, tree, node);
-        node->right = BuildBspNode(sRight, numRight, tree, node);
+        /* TODO: FIGURE OUT WHY TF IT'S NOT SUPPOSED TO BE THE OTHER WAY AROUND */
+        node->right = BuildBspNode(segmentsBehind, numBehind, tree, node);
+        node->left = BuildBspNode(segmentsInFront, numInFront, tree, node);
         free(segments);
     }
 
@@ -197,9 +192,8 @@ UpdateTree(BspTree *tree)
     u32 i = 0;
     while (node)
     {
-        f32 x = ((f32)i / tree->size) * width + radius + tree->region.left;
+        f32 x = ((f32)i / tree->size) * width + tree->region.left;
         f32 y = radius + node->depth * ((f32)height / tree->height) + tree->region.top;
-        /* u32 y = radius * (2 * node->depth + 1); */
 
         node->pos = (Vector2){ x, y };
         node->radius = radius;
@@ -255,6 +249,22 @@ DrawTree(BspTree *tree)
 {
     DrawNode(tree->root);
     DrawCircle(tree->active->pos.x, tree->active->pos.y, tree->active->radius, RED);
+
+    /* draw segments corresponding to active node */
+    BspNode *node = tree->active;
+    while (node)
+    {
+        for (usize i = 0; i < node->numSegments; i++)
+        {
+            Segment s = node->segments[i];
+            Vector2 left = (Vector2){ s.left.x, s.left.y };
+            Vector2 right = (Vector2){ s.right.x, s.right.y };
+            if (tree->active == node) DrawLineEx(left, right, 4.0f, RED);
+            else if (tree->active == node->left || tree->active == node->right) DrawLineEx(left, right, 4.0f, DARKPURPLE);
+            else DrawLineEx(left, right, 4.0f, BLUE);
+        }
+        node = node->parent;
+    }
 }
 
 void

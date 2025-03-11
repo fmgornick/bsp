@@ -1,7 +1,7 @@
 #include "bsp_s1.h"
 #include "bsp_stages.h"
 #include "bsp_utils.h"
-#include "bsp_vector.h"
+#include "i32_vector.h"
 #include "raylib.h"
 
 BSP_Stage
@@ -23,27 +23,18 @@ S1_Render(S1_Scene *scene)
     S1_DrawPolygon(scene);
 
     DrawText(TextFormat("remaining vertices: %d", MAX_VERTICES - scene->numVertices), 10, 10, 20, BLACK);
-    if (scene->numVertices == 0)
-    {
-        S1_DrawMessage("select cells to create simple polygon (don't run out)", BLACK, BLUE);
-    }
+    if (scene->numVertices == 0) S1_DrawMessage("select cells to create simple polygon (don't run out)", BLACK, BLUE);
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !S1_IntersectingPolygon(scene))
     {
         IVector2 newVertex = { scene->currentCell->j, scene->currentCell->i };
 
-        if (scene->numVertices == MAX_VERTICES)
-        {
-            nextStage = (IVector2DIsEqual(newVertex, scene->polygon[0])) ? S1_COMPLETED : S1_FAILED;
-        }
-        else if (scene->numVertices >= 3 && IVector2DIsEqual(newVertex, scene->polygon[0]))
-        {
-            nextStage = S1_COMPLETED;
-        }
-        else
-        {
-            scene->polygon[scene->numVertices++] = newVertex;
-        }
+        /* user tries to add last available edge => DONE if last edge closes polygon, FAILURE otherwise */
+        if (scene->numVertices == MAX_VERTICES) nextStage = (IVector2DIsEqual(newVertex, scene->polygon[0])) ? S1_COMPLETED : S1_FAILED;
+        /* user tries to add edge closing polygon => DONE (must have 3+ vertics to be a valid polygon) */
+        else if (scene->numVertices >= 3 && IVector2DIsEqual(newVertex, scene->polygon[0])) nextStage = S1_COMPLETED;
+        /* user tries to add edge and polygon still open => add edge and still PENDING */
+        else scene->polygon[scene->numVertices++] = newVertex;
     }
 
     EndDrawing();
@@ -89,14 +80,11 @@ S1_DrawCells(S1_Scene *scene)
         for (usize j = 0; j < COLS; j++)
         {
             Cell cell = scene->grid[i][j];
-            if (cell.active)
-            {
-                DrawRectangle(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, LIGHTGRAY);
-            }
-            else
-            {
-                DrawRectangle(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, WHITE);
-            }
+            /* fill cell gray if mouse is hovering it */
+            if (cell.active) DrawRectangle(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, LIGHTGRAY);
+            /* fill cell gray if mouse is NOT hovering it */
+            else DrawRectangle(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, WHITE);
+            /* draw gray perimiter around cell */
             DrawRectangleLines(cell.j * CELL_WIDTH, cell.i * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT, LIGHTGRAY);
         }
     }

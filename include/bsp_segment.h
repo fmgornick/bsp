@@ -1,24 +1,16 @@
 #ifndef BSP_SEGMENT_H_
 #define BSP_SEGMENT_H_
 
-#include "bsp_vector.h"
-#include "raylib.h"
+#include "f64_vector.h"
+#include "i32_vector.h"
 #include <stdbool.h>
 
 typedef struct Segment {
-    IVector2 p1;
-    IVector2 p2;
-    Vector2 leftEndpoint;
-    Vector2 rightEndpoint;
+    DVector2 left;
+    DVector2 right;
     bool splitLeft;
     bool splitRight;
 } Segment;
-
-typedef struct Hyperplane {
-    i32 a;
-    i32 b;
-    i32 c;
-} Hyperplane;
 
 Segment *BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size);
 void DrawSegments(Segment *segments, usize len);

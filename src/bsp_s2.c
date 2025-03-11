@@ -21,8 +21,10 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
         .top = 0,
         .bottom = HEIGHT,
     };
+
     scene->segments = BuildSegments(polygon, numVertices, segmentsRegion, &scene->numSegments);
     scene->tree = BuildBspTree(scene->segments, scene->numSegments, treeRegion);
+    UpdateTree(scene->tree);
 
     return S2_PENDING;
 }
@@ -30,11 +32,21 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
 BSP_Stage
 S2_Render(S2_Scene *scene)
 {
+    if (IsKeyPressed(KEY_LEFT))
+        if (scene->tree->active->left) scene->tree->active = scene->tree->active->left;
+
+    if (IsKeyPressed(KEY_RIGHT))
+        if (scene->tree->active->right) scene->tree->active = scene->tree->active->right;
+
+    if (IsKeyPressed(KEY_UP))
+        if (scene->tree->active->parent) scene->tree->active = scene->tree->active->parent;
+
     BeginDrawing();
     ClearBackground(WHITE);
-    DrawTree(scene->tree);
     DrawSegments(scene->segments, scene->numSegments);
+    DrawTree(scene->tree);
     EndDrawing();
+
     return S2_PENDING;
 }
 

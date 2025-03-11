@@ -22,6 +22,18 @@ BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
         if (polygon[i].y > yMax) yMax = polygon[i].y;
     }
 
+    /*
+     * signedArea > 0 => segments ordered counter-clockwise
+     * signedArea > 0 => segments ordered counter-clockwise
+     */
+    f32 signedArea = 0.0f;
+    for (usize i = 0; i < numSegments; i++)
+    {
+        usize j = (i + 1) % numSegments;
+        signedArea += (polygon[i].x * polygon[j].y) - (polygon[j].x * polygon[i].y);
+    }
+    signedArea /= 2.0f;
+
     f64 scale = min((f64)width / (xMax - xMin), (f64)height / (yMax - yMin)) * 0.9;
     f64 xPadding = (width - (xMax + xMin) * scale) / 2.0f + region.left;
     f64 yPadding = (height - (yMax + yMin) * scale) / 2.0f + region.top;
@@ -29,19 +41,17 @@ BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
     for (usize i = 0; i < numSegments; i++)
     {
         usize j = (i + 1) % numSegments;
-        IVector2 p1 = (IVector2){
-            .x = scale * polygon[i].x + xPadding,
-            .y = scale * polygon[i].y + yPadding,
-        };
-        IVector2 p2 = (IVector2){
-            .x = scale * polygon[j].x + xPadding,
-            .y = scale * polygon[j].y + yPadding,
-        };
-        segments[i] = (Segment){
-            .p1 = p1,
-            .p2 = p2,
-            .leftEndpoint = (Vector2){ p1.x, p1.y },
-            .rightEndpoint = (Vector2){ p2.x, p2.y },
+        /* make sure to order segments counter-clockwise, so normals face inward */
+        usize segmentIdx = (signedArea > 0) ? i : numSegments - 1 - i;
+        segments[segmentIdx] = (Segment){
+            .left = (DVector2) {
+                .x = (f64)scale * polygon[i].x + xPadding,
+                .y = (f64)scale * polygon[i].y + yPadding,
+            },
+            .right = (DVector2){
+                .x = (f64)scale * polygon[j].x + xPadding,
+                .y = (f64)scale * polygon[j].y + yPadding,
+            },
             .splitLeft = false,
             .splitRight = false,
         };
@@ -56,7 +66,7 @@ DrawSegments(Segment *segments, usize len)
 {
     for (usize i = 0; i < len; i++)
     {
-        Segment s = segments[i];
-        DrawLineEx((Vector2){ s.p1.x, s.p1.y }, (Vector2){ s.p2.x, s.p2.y }, 2.0f, BLACK);
+        Segment si = segments[i];
+        DrawLineEx((Vector2){ si.left.x, si.left.y }, (Vector2){ si.right.x, si.right.y }, 2.0f, BLACK);
     }
 }

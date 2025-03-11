@@ -2,7 +2,7 @@
 #define BSP_TEST_H_
 
 #include "bsp_utils.h"
-#include "bsp_vector.h"
+#include "i32_vector.h"
 
 /* triangle */
 IVector2 trianglePolygon[MAX_VERTICES] = {
@@ -34,11 +34,11 @@ u32 complexNumVertices = 24;
 /* convex polygon, uses lots of vertices, but no concavities */
 IVector2 convexPolygon[MAX_VERTICES] = {
     { .x = 5, .y = 26 }, { .x = 12, .y = 33 }, { .x = 24, .y = 35 }, { .x = 49, .y = 34 }, { .x = 61, .y = 24 }, { .x = 62, .y = 11 },
-    { .x = 52, .y = 1 }, { .x = 27, .y = 0 },  { .x = 11, .y = 1 },  { .x = 1, .y = 11 },  { .x = 0, .y = 21 },  { .x = 0, .y = 0 },
+    { .x = 52, .y = 1 }, { .x = 27, .y = 0 },  { .x = 11, .y = 1 },  { .x = 1, .y = 11 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
     { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
     { .x = 0, .y = 0 },  { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },   { .x = 0, .y = 0 },
 };
-u32 convexNumVertices = 12;
+u32 convexNumVertices = 10;
 
 /* normal polygon, fills texture width */
 IVector2 fatPolygon[MAX_VERTICES] = {

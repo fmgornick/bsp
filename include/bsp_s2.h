@@ -4,7 +4,7 @@
 #include "bsp_stages.h"
 #include "bsp_tree.h"
 #include "bsp_utils.h"
-#include "bsp_vector.h"
+#include "i32_vector.h"
 #include "raylib.h"
 #include <stdbool.h>
 

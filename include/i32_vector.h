@@ -1,5 +1,5 @@
-#ifndef BSP_VECTOR_H_
-#define BSP_VECTOR_H_
+#ifndef I32_VECTOR_H_
+#define I32_VECTOR_H_
 
 #include "bsp_utils.h"
 #include <stdbool.h>
@@ -25,4 +25,4 @@ i32 IVector2Determinant(IVector2 v1, IVector2 v2);
 bool IVector2DIsEqual(IVector2 v1, IVector2 v2);
 IVector2 IVector2Negate(IVector2 v);
 
-#endif // BSP_VECTOR_H_
+#endif // I32_VECTOR_H_
