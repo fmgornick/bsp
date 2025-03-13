@@ -1,6 +1,7 @@
 #ifndef BSP_S2_H_
 #define BSP_S2_H_
 
+#include "bsp_region.h"
 #include "bsp_stages.h"
 #include "bsp_tree.h"
 #include "bsp_utils.h"
@@ -12,6 +13,7 @@ typedef struct S2_Scene {
     Segment *segments;
     usize numSegments;
     BspTree *tree;
+    BspRegion *region;
 } S2_Scene;
 
 BSP_Stage S2_Init(IVector2 *polygon, u32 numVertices, S2_Scene *scene);

@@ -92,27 +92,7 @@ BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent)
                 {
                     segmentsBehind[behindIdx] = segments[i];
                     segmentsInFront[inFrontIdx] = segments[i];
-
-                    /*
-                     * a1 * x + b1 * y + c1 = 0
-                     * a2 * x + b2 * y + c2 = 0
-                     *
-                     * => |a1 b1| |x|   |c1|
-                     *    |a2 b2| |y| + |c2| = 0
-                     *
-                     * =>  |x|   |a1 b1|-1 |-c1|
-                     *     |y| = |a2 b2|   |-c2|
-                     * */
-                    f64 a1 = split.right.y - split.left.y;
-                    f64 b1 = split.left.x - split.right.x;
-                    f64 c1 = (split.right.x * split.left.y) - (split.left.x * split.right.y);
-                    f64 a2 = si.right.y - si.left.y;
-                    f64 b2 = si.left.x - si.right.x;
-                    f64 c2 = (si.right.x * si.left.y) - (si.left.x * si.right.y);
-                    DVector2 intersection = {
-                        .x = (f64)((b1 * c2) - (b2 * c1)) / ((a1 * b2) - (b1 * a2)),
-                        .y = (f64)((a2 * c1) - (a1 * c2)) / ((a1 * b2) - (b1 * a2)),
-                    };
+                    DVector2 intersection = SegmentIntersection(split, si);
 
                     if (leftSide < rightSide)
                     {
@@ -251,20 +231,20 @@ DrawTree(BspTree *tree)
     DrawCircle(tree->active->pos.x, tree->active->pos.y, tree->active->radius, RED);
 
     /* draw segments corresponding to active node */
-    BspNode *node = tree->active;
-    while (node)
-    {
-        for (usize i = 0; i < node->numSegments; i++)
-        {
-            Segment s = node->segments[i];
-            Vector2 left = (Vector2){ s.left.x, s.left.y };
-            Vector2 right = (Vector2){ s.right.x, s.right.y };
-            if (tree->active == node) DrawLineEx(left, right, 4.0f, RED);
-            else if (tree->active == node->left || tree->active == node->right) DrawLineEx(left, right, 4.0f, DARKPURPLE);
-            else DrawLineEx(left, right, 4.0f, BLUE);
-        }
-        node = node->parent;
-    }
+    /* BspNode *node = tree->active; */
+    /* while (node) */
+    /* { */
+    /*     for (usize i = 0; i < node->numSegments; i++) */
+    /*     { */
+    /*         Segment s = node->segments[i]; */
+    /*         Vector2 left = (Vector2){ s.left.x, s.left.y }; */
+    /*         Vector2 right = (Vector2){ s.right.x, s.right.y }; */
+    /*         if (tree->active == node) DrawLineEx(left, right, 4.0f, RED); */
+    /*         else if (tree->active == node->left || tree->active == node->right) DrawLineEx(left, right, 4.0f, DARKPURPLE); */
+    /*         else DrawLineEx(left, right, 4.0f, BLUE); */
+    /*     } */
+    /*     node = node->parent; */
+    /* } */
 }
 
 void

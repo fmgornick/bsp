@@ -1,4 +1,5 @@
 #include "bsp_s2.h"
+#include "bsp_region.h"
 #include "bsp_segment.h"
 #include "bsp_stages.h"
 #include "bsp_tree.h"
@@ -26,6 +27,9 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
     scene->tree = BuildBspTree(scene->segments, scene->numSegments, treeRegion);
     UpdateTree(scene->tree);
 
+    scene->region = InitRegion(WIDTH, HEIGHT);
+    AddSegment(scene->region, scene->tree->root->segments[0], SplitLeft);
+
     return S2_PENDING;
 }
 
@@ -33,10 +37,22 @@ BSP_Stage
 S2_Render(S2_Scene *scene)
 {
     if (IsKeyPressed(KEY_LEFT))
-        if (scene->tree->active->left) scene->tree->active = scene->tree->active->left;
+    {
+        if (scene->tree->active->left)
+        {
+            scene->tree->active = scene->tree->active->left;
+            AddSegment(scene->region, scene->tree->active->segments[0], SplitLeft);
+        }
+    }
 
     if (IsKeyPressed(KEY_RIGHT))
-        if (scene->tree->active->right) scene->tree->active = scene->tree->active->right;
+    {
+        if (scene->tree->active->right)
+        {
+            scene->tree->active = scene->tree->active->right;
+            AddSegment(scene->region, scene->tree->active->segments[0], SplitRight);
+        }
+    }
 
     if (IsKeyPressed(KEY_UP))
         if (scene->tree->active->parent) scene->tree->active = scene->tree->active->parent;
@@ -45,6 +61,7 @@ S2_Render(S2_Scene *scene)
     ClearBackground(WHITE);
     DrawSegments(scene->segments, scene->numSegments);
     DrawTree(scene->tree);
+    DrawRegion(scene->region);
     EndDrawing();
 
     return S2_PENDING;

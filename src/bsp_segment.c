@@ -1,6 +1,9 @@
 #include "bsp_segment.h"
+#include "f64_vector.h"
 #include "raylib.h"
+#include "raymath.h"
 #include "stdlib.h"
+#include <assert.h>
 #include <limits.h>
 
 Segment *
@@ -69,4 +72,63 @@ DrawSegments(Segment *segments, usize len)
         Segment si = segments[i];
         DrawLineEx((Vector2){ si.left.x, si.left.y }, (Vector2){ si.right.x, si.right.y }, 2.0f, BLACK);
     }
+}
+
+DVector2
+SegmentIntersection(Segment s1, Segment s2)
+{
+    /* segments are parallel => assume they never intersect */
+    assert(!SegmentsParallel(s1, s2));
+
+    /*
+     * a1 * x + b1 * y + c1 = 0
+     * a2 * x + b2 * y + c2 = 0
+     *
+     * => |a1 b1| |x|   |c1|
+     *    |a2 b2| |y| + |c2| = 0
+     *
+     * =>  |x|   |a1 b1|-1 |-c1|
+     *     |y| = |a2 b2|   |-c2|
+     */
+    f64 a1 = s1.right.y - s1.left.y;
+    f64 b1 = s1.left.x - s1.right.x;
+    f64 c1 = (s1.right.x * s1.left.y) - (s1.left.x * s1.right.y);
+
+    f64 a2 = s2.right.y - s2.left.y;
+    f64 b2 = s2.left.x - s2.right.x;
+    f64 c2 = (s2.right.x * s2.left.y) - (s2.left.x * s2.right.y);
+
+    return (DVector2){
+        .x = (f64)((b1 * c2) - (b2 * c1)) / ((a1 * b2) - (b1 * a2)),
+        .y = (f64)((a2 * c1) - (a1 * c2)) / ((a1 * b2) - (b1 * a2)),
+    };
+}
+
+bool
+SegmentsParallel(Segment s1, Segment s2)
+{
+    return babs(DVector2Determinant(DVector2Subtract(s1.right, s1.left), DVector2Subtract(s2.right, s2.left))) < EPSILON;
+}
+
+bool
+PointInSegment(DVector2 pt, Segment s)
+{
+    f64 a = s.right.y - s.left.y;
+    f64 b = s.left.x - s.right.x;
+    f64 c = (s.right.x * s.left.y) - (s.left.x * s.right.y);
+
+    if (babs(a * pt.x + b * pt.y + c) > EPSILON) return false;
+    if (pt.x < min(s.left.x, s.right.x)) return false;
+    if (pt.x > max(s.left.x, s.right.x)) return false;
+    if (pt.y < min(s.left.y, s.right.y)) return false;
+    if (pt.y > max(s.left.y, s.right.y)) return false;
+    return true;
+}
+
+SegmentSide
+PointSegmentSide(DVector2 pt, Segment s)
+{
+    f64 dot = DVector2DotProduct(DVector2Subtract(s.right, s.left), DVector2Subtract(pt, s.left));
+    if (babs(dot) < EPSILON) return SegmentInside;
+    return dot < 0 ? SegmentRight : SegmentLeft;
 }
