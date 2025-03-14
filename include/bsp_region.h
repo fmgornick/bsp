@@ -6,13 +6,12 @@
 #include <stdbool.h>
 
 typedef struct BspRegion {
-    Segment boundary[MAX_VERTICES + 4];
-    usize boundarySize;
-
-    Segment segment;
-    usize leftIntersectIdx;
-    usize rightIntersectIdx;
-    bool active;
+    Segment *boundary;  /* boundary enclosing region */
+    usize boundarySize; /* size of boundary enclosing region */
+    Segment line;       /* line bisecting current region (if any) */
+    bool hasLine;       /* true if line bisecting current region exists */
+    usize leftIdx;      /* index of boundary segment intersecting left side of line*/
+    usize rightIdx;     /* index of boundary segment intersecting right side of line*/
 } BspRegion;
 
 typedef enum SplitDirection {
@@ -24,5 +23,8 @@ BspRegion *InitRegion(usize width, usize height);
 void AddSegment(BspRegion *region, Segment s, SplitDirection dir);
 void UpdateRegionSegment(Segment s, BspRegion *region);
 void DrawRegion(BspRegion *region);
+
+BspRegion *BuildRegion(usize width, usize height, Segment initialLine);
+BspRegion *NewRegion(const BspRegion *oldRegion, const Segment *newLine, usize numSegments, SplitDirection dir);
 
 #endif // BSP_REGION_H_

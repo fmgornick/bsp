@@ -28,7 +28,7 @@ typedef struct BspTree {
     Region region;
 } BspTree;
 
-BspNode *BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent);
+BspNode *BuildBspNode(Segment *segments, usize len, BspNode *parent);
 BspTree *BuildBspTree(Segment *segments, usize len, Region region);
 void FreeBspTree(BspTree *tree);
 void FreeBspNode(BspNode *node);

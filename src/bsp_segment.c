@@ -118,10 +118,10 @@ PointInSegment(DVector2 pt, Segment s)
     f64 c = (s.right.x * s.left.y) - (s.left.x * s.right.y);
 
     if (babs(a * pt.x + b * pt.y + c) > EPSILON) return false;
-    if (pt.x < min(s.left.x, s.right.x)) return false;
-    if (pt.x > max(s.left.x, s.right.x)) return false;
-    if (pt.y < min(s.left.y, s.right.y)) return false;
-    if (pt.y > max(s.left.y, s.right.y)) return false;
+    if (pt.x < (min(s.left.x, s.right.x) - EPSILON)) return false;
+    if (pt.x > (max(s.left.x, s.right.x) + EPSILON)) return false;
+    if (pt.y < (min(s.left.y, s.right.y) - EPSILON)) return false;
+    if (pt.y > (max(s.left.y, s.right.y) + EPSILON)) return false;
     return true;
 }
 

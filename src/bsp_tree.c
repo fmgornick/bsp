@@ -8,7 +8,7 @@
 #include <string.h>
 
 BspNode *
-BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent)
+BuildBspNode(Segment *segments, usize len, BspNode *parent)
 {
     BspNode *node = (BspNode *)malloc(sizeof(BspNode));
     if (parent)
@@ -22,8 +22,8 @@ BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent)
         node->depth = 0;
     }
 
-    tree->size += 1;
-    if (node->depth == tree->height) tree->height += 1;
+    /* tree->size += 1; */
+    /* if (node->depth == tree->height) tree->height += 1; */
 
     if (len <= 1)
     {
@@ -116,8 +116,8 @@ BuildBspNode(Segment *segments, usize len, BspTree *tree, BspNode *parent)
         }
 
         /* TODO: FIGURE OUT WHY TF IT'S NOT SUPPOSED TO BE THE OTHER WAY AROUND */
-        node->right = BuildBspNode(segmentsBehind, numBehind, tree, node);
-        node->left = BuildBspNode(segmentsInFront, numInFront, tree, node);
+        node->right = BuildBspNode(segmentsBehind, numBehind, node);
+        node->left = BuildBspNode(segmentsInFront, numInFront, node);
         free(segments);
     }
 
@@ -135,7 +135,7 @@ BuildBspTree(Segment *segments, usize len, Region region)
     Segment *segmentsCopy = (Segment *)malloc(len * sizeof(Segment));
     memcpy(segmentsCopy, segments, len * sizeof(Segment));
 
-    BspNode *root = BuildBspNode(segmentsCopy, len, tree, NULL);
+    BspNode *root = BuildBspNode(segmentsCopy, len, NULL);
     tree->root = root;
     tree->active = root;
 
