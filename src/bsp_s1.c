@@ -64,6 +64,11 @@ S1_RenderFailure(S1_Scene *scene)
 }
 
 void
+S1_Free(S1_Scene *scene)
+{
+}
+
+void
 S1_GridInit(S1_Scene *scene)
 {
     for (usize i = 0; i < ROWS; i++)

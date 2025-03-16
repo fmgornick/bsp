@@ -1,29 +1,19 @@
 #include "bsp_tree.h"
+#include "bsp_region.h"
 #include "bsp_segment.h"
 #include "bsp_utils.h"
 #include "f64_vector.h"
-#include "raylib.h"
 #include "raymath.h"
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 BspNode *
-BuildBspNode(Segment *segments, usize len, BspNode *parent)
+BuildBspTree(Segment *segments, usize len, BspNode *parent)
 {
     BspNode *node = (BspNode *)malloc(sizeof(BspNode));
-    if (parent)
-    {
-        node->parent = parent;
-        node->depth = parent->depth + 1;
-    }
-    else
-    {
-        node->parent = NULL;
-        node->depth = 0;
-    }
-
-    /* tree->size += 1; */
-    /* if (node->depth == tree->height) tree->height += 1; */
+    if (parent) node->parent = parent;
+    else node->parent = NULL;
 
     if (len <= 1)
     {
@@ -58,11 +48,13 @@ BuildBspNode(Segment *segments, usize len, BspNode *parent)
             }
         }
 
+        assert(numInside >= 1);
         node->segments = (Segment *)malloc(numInside * sizeof(Segment));
         node->segments[0] = split;
         node->numSegments = numInside;
 
-        Segment *segmentsBehind, *segmentsInFront;
+        Segment *segmentsBehind = NULL;
+        Segment *segmentsInFront = NULL;
         if (numBehind > 0) segmentsBehind = (Segment *)malloc(numBehind * sizeof(Segment));
         if (numInFront > 0) segmentsInFront = (Segment *)malloc(numInFront * sizeof(Segment));
         usize behindIdx = 0, inFrontIdx = 0, insideIdx = 1;
@@ -84,10 +76,12 @@ BuildBspNode(Segment *segments, usize len, BspNode *parent)
                 /* both endpoints in front of split segment => add si to right segment list */
                 else if (leftSide + EPSILON > 0 && rightSide + EPSILON > 0) segmentsInFront[inFrontIdx++] = si;
 
-                /* current segmenst is bisected by splitting line =>
+                /*
+                 * current segmenst is bisected by splitting line =>
                  *  - find intersection point of segment si with splitting line
                  *  - insert split subsegments into respective left/right segment lists
-                 *  - update bools for each subsegment for "free split" check in recursive call */
+                 *  - update bools for each subsegment for "free split" check in recursive call
+                 */
                 else
                 {
                     segmentsBehind[behindIdx] = segments[i];
@@ -116,69 +110,202 @@ BuildBspNode(Segment *segments, usize len, BspNode *parent)
         }
 
         /* TODO: FIGURE OUT WHY TF IT'S NOT SUPPOSED TO BE THE OTHER WAY AROUND */
-        node->right = BuildBspNode(segmentsBehind, numBehind, node);
-        node->left = BuildBspNode(segmentsInFront, numInFront, node);
+        node->right = BuildBspTree(segmentsBehind, numBehind, node);
+        node->left = BuildBspTree(segmentsInFront, numInFront, node);
         free(segments);
     }
 
     return node;
 }
 
-BspTree *
-BuildBspTree(Segment *segments, usize len, Region region)
+void
+FreeBspTree(BspNode *node)
 {
-    BspTree *tree = (BspTree *)malloc(sizeof(BspTree));
-    tree->size = 0;
-    tree->height = 0;
-    tree->region = region;
+    if (node->segments) free(node->segments);
+    if (node->left) FreeBspTree(node->left);
+    if (node->right) FreeBspTree(node->right);
+    free(node);
+}
 
-    Segment *segmentsCopy = (Segment *)malloc(len * sizeof(Segment));
-    memcpy(segmentsCopy, segments, len * sizeof(Segment));
+BspTreeMeta *
+BuildBspTreeMeta(Segment *segments, usize len, Region region)
+{
+    BspTreeMeta *tree = (BspTreeMeta *)malloc(sizeof(BspTreeMeta));
 
-    BspNode *root = BuildBspNode(segmentsCopy, len, NULL);
-    tree->root = root;
-    tree->active = root;
+    BspNode *root;
+    { /* create actual bsp tree */
+        Segment *segmentsCopy = (Segment *)malloc(len * sizeof(Segment));
+        memcpy(segmentsCopy, segments, len * sizeof(Segment));
+        root = BuildBspTree(segmentsCopy, len, NULL);
+        tree->root = root;
+        tree->active = root;
+    }
 
-    UpdateTree(tree);
+    { /* calculate size of tree */
+        BspNode *node = MinNode(root);
+        while (node)
+        {
+            tree->size += 1;
+            node = SuccNode(node);
+        }
+    }
+
+    { /* add each node to array for easy indexing (also store node depth) */
+        tree->meta = (BspNodeMeta *)malloc(tree->size * sizeof(BspNodeMeta));
+        BspNode *node = MinNode(root);
+        for (usize i = 0; i < tree->size; i++)
+        {
+            if (node == root)
+            {
+                tree->rootIdx = i;
+                tree->activeIdx = i;
+            }
+            tree->meta[i].node = node;
+            tree->meta[i].depth = 0;
+            BspNode *tmp = node->parent;
+            while (tmp)
+            {
+                tree->meta[i].depth += 1;
+                tmp = tmp->parent;
+            }
+            node = SuccNode(node);
+        }
+    }
+
+    { /* calculate height of tree */
+        usize maxDepth = 0;
+        for (usize i = 0; i < tree->size; i++)
+            maxDepth = max(maxDepth, tree->meta[i].depth);
+        tree->height = maxDepth + 1;
+    }
+
+    { /* calculate node positions and radius for displaying BSP tree nodes to user */
+        u32 width = (region.right - region.left), x0 = region.left;
+        u32 height = (region.bottom - region.top), y0 = region.top;
+        u32 shorter = min(width, height);
+        tree->nodeRadius = (f32)shorter / max(tree->height * 2, tree->size + 1);
+
+        for (usize i = 0; i < tree->size; i++)
+        {
+            f32 x = tree->nodeRadius + ((f32)i / (tree->size + 1)) * width + x0;
+            f32 y = tree->nodeRadius + tree->meta[i].depth * ((f32)height / tree->height) + y0;
+            tree->meta[i].pos = (Vector2){ x, y };
+        }
+    }
+
+    { /* find indexes of left/right/parent nodes for quick metadata navigation */
+        for (usize i = 0; i < tree->size; i++)
+        {
+            if (tree->meta[i].node->left)
+            {
+                for (usize j = 0; j < i; j++)
+                    if (tree->meta[i].node->left == tree->meta[j].node)
+                    {
+                        tree->meta[i].left = j;
+                        tree->meta[j].parent = i;
+                    }
+                assert(bspNode(tree, i)->left == bspNode(tree, idxLeft(tree, i)));
+                assert(bspNode(tree, idxLeft(tree, i))->parent == bspNode(tree, i));
+            }
+            if (tree->meta[i].node->right)
+            {
+                for (usize j = i + 1; j < tree->size; j++)
+                    if (tree->meta[i].node->right == tree->meta[j].node)
+                    {
+                        tree->meta[i].right = j;
+                        tree->meta[j].parent = i;
+                    }
+                assert(bspNode(tree, i)->right == bspNode(tree, idxRight(tree, i)));
+                assert(bspNode(tree, idxRight(tree, i))->parent == bspNode(tree, i));
+            }
+        }
+    }
+
+    BuildTreeMetaRegions(tree, tree->rootIdx);
+    tree->activeRegion = tree->meta[tree->rootIdx].region;
     return tree;
 }
 
 void
-FreeBspTree(BspTree *tree)
+FreeBspTreeMeta(BspTreeMeta *tree)
 {
-    FreeBspNode(tree->root);
+    for (usize i = 0; i < tree->size; i++)
+        FreeBspRegion(tree->meta[i].region);
+    FreeBspTree(tree->root);
+    free(tree->meta);
     free(tree);
 }
 
 void
-FreeBspNode(BspNode *node)
+BuildTreeMetaRegions(BspTreeMeta *tree, usize idx)
 {
-    if (node->left) FreeBspNode(node->left);
-    if (node->right) FreeBspNode(node->right);
-
-    free(node->segments);
-    free(node);
+    if (idx == tree->rootIdx) tree->meta[idx].region = BuildBspRegion(WIDTH / 2, HEIGHT, tree->meta[idx].node->segments[0]);
+    else
+    {
+        BspNodeMeta parent = tree->meta[idxParent(tree, idx)];
+        BspNode *node = bspNode(tree, idx);
+        if (node == parent.node->left) tree->meta[idx].region = NewBspRegion(parent.region, node->segments, node->numSegments, SplitLeft);
+        if (node == parent.node->right) tree->meta[idx].region = NewBspRegion(parent.region, node->segments, node->numSegments, SplitRight);
+    }
+    if (bspNode(tree, idx)->left) BuildTreeMetaRegions(tree, idxLeft(tree, idx));
+    if (bspNode(tree, idx)->right) BuildTreeMetaRegions(tree, idxRight(tree, idx));
 }
 
 void
-UpdateTree(BspTree *tree)
+DrawBspTreeMeta(BspTreeMeta *tree)
 {
-    u32 width = tree->region.right - tree->region.left;
-    u32 height = tree->region.bottom - tree->region.top;
-    u32 shorter = min(width, height);
-    f32 radius = (f32)shorter / max(tree->height * 2, tree->size);
-
-    BspNode *node = MinNode(tree->root);
-    u32 i = 0;
-    while (node)
+    for (usize i = 0; i < tree->size; i++)
     {
-        f32 x = ((f32)i / tree->size) * width + tree->region.left;
-        f32 y = radius + node->depth * ((f32)height / tree->height) + tree->region.top;
+        Vector2 node = tree->meta[i].pos;
+        if (tree->meta[i].node->left)
+        {
+            Vector2 left = tree->meta[idxLeft(tree, i)].pos;
+            DrawLineEx(node, left, 2.0f, BLACK);
+        }
+        if (tree->meta[i].node->right)
+        {
+            Vector2 right = tree->meta[idxRight(tree, i)].pos;
+            DrawLineEx(node, right, 2.0f, BLACK);
+        }
+    }
+    for (usize i = 0; i < tree->size; i++)
+    {
+        Vector2 node = tree->meta[i].pos;
+        if (i == tree->activeIdx) DrawCircle(node.x, node.y, tree->nodeRadius, RED);
+        else DrawCircle(node.x, node.y, tree->nodeRadius, BLUE);
+    }
+}
 
-        node->pos = (Vector2){ x, y };
-        node->radius = radius;
-        node = SuccNode(node);
-        i++;
+void
+BspTreeMetaMoveLeft(BspTreeMeta *tree)
+{
+    if (tree->active->left)
+    {
+        tree->active = tree->active->left;
+        tree->activeIdx = idxLeft(tree, tree->activeIdx);
+        tree->activeRegion = tree->meta[tree->activeIdx].region;
+    }
+}
+
+void
+BspTreeMetaMoveRight(BspTreeMeta *tree)
+{
+    if (tree->active->right)
+    {
+        tree->active = tree->active->right;
+        tree->activeIdx = idxRight(tree, tree->activeIdx);
+        tree->activeRegion = tree->meta[tree->activeIdx].region;
+    }
+}
+
+void
+BspTreeMetaMoveUp(BspTreeMeta *tree)
+{
+    if (tree->active->parent)
+    {
+        tree->active = tree->active->parent;
+        tree->activeIdx = idxParent(tree, tree->activeIdx);
+        tree->activeRegion = tree->meta[tree->activeIdx].region;
     }
 }
 
@@ -204,11 +331,9 @@ BspNode *
 PrevNode(BspNode *node)
 {
     if (node->left) return MaxNode(node->left);
-
     BspNode *tmp = node;
     while (tmp->parent && tmp == tmp->parent->left)
         tmp = tmp->parent;
-
     return tmp->parent;
 }
 
@@ -216,49 +341,32 @@ BspNode *
 SuccNode(BspNode *node)
 {
     if (node->right) return MinNode(node->right);
-
     BspNode *tmp = node;
     while (tmp->parent && tmp == tmp->parent->right)
         tmp = tmp->parent;
-
     return tmp->parent;
 }
 
-void
-DrawTree(BspTree *tree)
+BspNode *
+bspNode(BspTreeMeta *tree, usize idx)
 {
-    DrawNode(tree->root);
-    DrawCircle(tree->active->pos.x, tree->active->pos.y, tree->active->radius, RED);
-
-    /* draw segments corresponding to active node */
-    /* BspNode *node = tree->active; */
-    /* while (node) */
-    /* { */
-    /*     for (usize i = 0; i < node->numSegments; i++) */
-    /*     { */
-    /*         Segment s = node->segments[i]; */
-    /*         Vector2 left = (Vector2){ s.left.x, s.left.y }; */
-    /*         Vector2 right = (Vector2){ s.right.x, s.right.y }; */
-    /*         if (tree->active == node) DrawLineEx(left, right, 4.0f, RED); */
-    /*         else if (tree->active == node->left || tree->active == node->right) DrawLineEx(left, right, 4.0f, DARKPURPLE); */
-    /*         else DrawLineEx(left, right, 4.0f, BLUE); */
-    /*     } */
-    /*     node = node->parent; */
-    /* } */
+    return tree->meta[idx].node;
 }
 
-void
-DrawNode(BspNode *node)
+usize
+idxLeft(BspTreeMeta *tree, usize idx)
 {
-    if (node->left)
-    {
-        DrawLineEx(node->pos, node->left->pos, 1.0f, BLACK);
-        DrawNode(node->left);
-    }
-    if (node->right)
-    {
-        DrawLineEx(node->pos, node->right->pos, 1.0f, BLACK);
-        DrawNode(node->right);
-    }
-    DrawCircle(node->pos.x, node->pos.y, node->radius, BLUE);
+    return tree->meta[idx].left;
+}
+
+usize
+idxRight(BspTreeMeta *tree, usize idx)
+{
+    return tree->meta[idx].right;
+}
+
+usize
+idxParent(BspTreeMeta *tree, usize idx)
+{
+    return tree->meta[idx].parent;
 }

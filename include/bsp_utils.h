@@ -10,7 +10,6 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define clamp(a, lower, upper) min(max(a, lower), upper)
 #define sign(v) (((v) > 0) - ((v) < 0))
-/* #define mod(i, n) (((i) % (n) + (n)) % (n)) */
 
 typedef int i32;
 typedef long long int i64;

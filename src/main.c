@@ -46,5 +46,9 @@ main(isize argc, char *argv[])
             TraceLog(LOG_ERROR, "uh oh");
         }
     }
+
+    if (stage > S1_INITIALIZING) S1_Free(&s1);
+    if (stage > S2_INITIALIZING) S2_Free(&s2);
+
     return 0;
 }
