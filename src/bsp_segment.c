@@ -1,10 +1,12 @@
 #include "bsp_segment.h"
 #include "f64_vector.h"
+#include "i32_vector.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "stdlib.h"
 #include <assert.h>
 #include <limits.h>
+#include <stdlib.h>
 
 Segment *
 BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
@@ -27,7 +29,7 @@ BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
 
     /*
      * signedArea > 0 => segments ordered counter-clockwise
-     * signedArea > 0 => segments ordered counter-clockwise
+     * signedArea < 0 => segments ordered clockwise
      */
     f32 signedArea = 0.0f;
     for (usize i = 0; i < numSegments; i++)
@@ -44,16 +46,27 @@ BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
     for (usize i = 0; i < numSegments; i++)
     {
         usize j = (i + 1) % numSegments;
-        /* make sure to order segments counter-clockwise, so normals face inward */
-        usize segmentIdx = (signedArea > 0) ? i : numSegments - 1 - i;
+        usize leftIdx, rightIdx, segmentIdx;
+        if (signedArea >= 0.0f)
+        {
+            leftIdx = i;
+            rightIdx = j;
+            segmentIdx = i;
+        }
+        else
+        {
+            leftIdx = j;
+            rightIdx = i;
+            segmentIdx = numSegments - 1 - i;
+        }
         segments[segmentIdx] = (Segment){
             .left = (DVector2) {
-                .x = (f64)scale * polygon[i].x + xPadding,
-                .y = (f64)scale * polygon[i].y + yPadding,
+                .x = (f64)scale * polygon[leftIdx].x + xPadding,
+                .y = (f64)scale * polygon[leftIdx].y + yPadding,
             },
             .right = (DVector2){
-                .x = (f64)scale * polygon[j].x + xPadding,
-                .y = (f64)scale * polygon[j].y + yPadding,
+                .x = (f64)scale * polygon[rightIdx].x + xPadding,
+                .y = (f64)scale * polygon[rightIdx].y + yPadding,
             },
             .splitLeft = false,
             .splitRight = false,
@@ -65,21 +78,78 @@ BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
 }
 
 void
+FreeSegments(Segment *segments)
+{
+    free(segments);
+}
+
+void
+DrawSegment(Segment segment, f32 thick, Color color, bool hasNormal)
+{
+    Vector2 left = { segment.left.x, segment.left.y };
+    Vector2 right = { segment.right.x, segment.right.y };
+    DrawLineEx(left, right, thick, color);
+    if (hasNormal)
+    {
+        Vector2 half = Vector2Add(left, Vector2Scale(Vector2Subtract(right, left), 0.5f));
+        Vector2 unit = Vector2Normalize(Vector2Subtract(right, left));
+        Vector2 perp = { unit.y, -unit.x };
+        DrawLineEx(half, Vector2Add(half, Vector2Scale(perp, 10.0f)), 5.0f, PURPLE);
+    }
+}
+
+void
 DrawSegments(Segment *segments, usize len)
 {
     for (usize i = 0; i < len; i++)
-    {
-        Segment si = segments[i];
-        DrawLineEx((Vector2){ si.left.x, si.left.y }, (Vector2){ si.right.x, si.right.y }, 2.0f, BLACK);
-    }
+        DrawSegment(segments[i], 2.0f, BLACK, false);
+}
+
+f64
+SegmentsDotProduct(Segment u, Segment v)
+{
+    DVector2 du = DVector2Subtract(u.right, u.left);
+    DVector2 dv = DVector2Subtract(v.right, v.left);
+    return DVector2DotProduct(du, dv);
+}
+
+f64
+SegmentPointDeterminant(Segment s, DVector2 pt)
+{
+    DVector2 u = DVector2Subtract(s.right, s.left);
+    DVector2 v = DVector2Subtract(pt, s.left);
+    return DVector2DotProduct(u, v);
+}
+
+Side
+SegmentSide(Segment s, DVector2 pt)
+{
+    DVector2 pq = DVector2Subtract(s.right, s.left);
+    DVector2 pr = DVector2Subtract(pt, s.left);
+    f64 det = DVector2Determinant(pq, pr);
+    if (babs(det) < EPSILON) return SideInside;
+    else if (det >= 0.0) return SideLeft;
+    else return SideRight;
+}
+
+Side
+SegmentSides(Segment u, Segment v)
+{
+    DVector2 pq = DVector2Subtract(u.right, u.left);
+    DVector2 pr = DVector2Subtract(v.left, u.left);
+    DVector2 ps = DVector2Subtract(v.right, u.left);
+    f64 leftSide = DVector2Determinant(pq, pr);
+    f64 rightSide = DVector2Determinant(pq, ps);
+    if (babs(leftSide) < EPSILON && babs(rightSide) < EPSILON) return SideInside;
+    else if (leftSide + EPSILON > 0 && rightSide + EPSILON > 0) return SideLeft;
+    else if (leftSide - EPSILON < 0 && rightSide - EPSILON < 0) return SideRight;
+    else return SideBoth;
 }
 
 DVector2
 SegmentIntersection(Segment s1, Segment s2)
 {
-    /* segments are parallel => assume they never intersect */
     assert(!SegmentsParallel(s1, s2));
-
     /*
      * a1 * x + b1 * y + c1 = 0
      * a2 * x + b2 * y + c2 = 0
@@ -93,11 +163,9 @@ SegmentIntersection(Segment s1, Segment s2)
     f64 a1 = s1.right.y - s1.left.y;
     f64 b1 = s1.left.x - s1.right.x;
     f64 c1 = (s1.right.x * s1.left.y) - (s1.left.x * s1.right.y);
-
     f64 a2 = s2.right.y - s2.left.y;
     f64 b2 = s2.left.x - s2.right.x;
     f64 c2 = (s2.right.x * s2.left.y) - (s2.left.x * s2.right.y);
-
     return (DVector2){
         .x = (f64)((b1 * c2) - (b2 * c1)) / ((a1 * b2) - (b1 * a2)),
         .y = (f64)((a2 * c1) - (a1 * c2)) / ((a1 * b2) - (b1 * a2)),
@@ -105,18 +173,11 @@ SegmentIntersection(Segment s1, Segment s2)
 }
 
 bool
-SegmentsParallel(Segment s1, Segment s2)
-{
-    return babs(DVector2Determinant(DVector2Subtract(s1.right, s1.left), DVector2Subtract(s2.right, s2.left))) < EPSILON;
-}
-
-bool
-PointInSegment(DVector2 pt, Segment s)
+SegmentContainsPoint(Segment s, DVector2 pt)
 {
     f64 a = s.right.y - s.left.y;
     f64 b = s.left.x - s.right.x;
     f64 c = (s.right.x * s.left.y) - (s.left.x * s.right.y);
-
     if (babs(a * pt.x + b * pt.y + c) > EPSILON) return false;
     if (pt.x < (min(s.left.x, s.right.x) - EPSILON)) return false;
     if (pt.x > (max(s.left.x, s.right.x) + EPSILON)) return false;
@@ -125,10 +186,10 @@ PointInSegment(DVector2 pt, Segment s)
     return true;
 }
 
-SegmentSide
-PointSegmentSide(DVector2 pt, Segment s)
+bool
+SegmentsParallel(Segment s1, Segment s2)
 {
-    f64 dot = DVector2DotProduct(DVector2Subtract(s.right, s.left), DVector2Subtract(pt, s.left));
-    if (babs(dot) < EPSILON) return SegmentInside;
-    return dot < 0 ? SegmentRight : SegmentLeft;
+    DVector2 pq = DVector2Subtract(s1.right, s1.left);
+    DVector2 rs = DVector2Subtract(s2.right, s2.left);
+    return babs(DVector2Determinant(pq, rs)) < EPSILON;
 }

@@ -44,15 +44,13 @@ BuildBspRegion(usize width, usize height, Segment initialLine)
         usize numIntersections = 0;
         for (usize i = 0; i < region->boundarySize; i++)
         {
-            if (!SegmentsParallel(initialLine, region->boundary[i]))
+            if (SegmentsParallel(initialLine, region->boundary[i])) continue;
+            DVector2 intersection = SegmentIntersection(initialLine, region->boundary[i]);
+            if (SegmentContainsPoint(region->boundary[i], intersection))
             {
-                DVector2 intersection = SegmentIntersection(initialLine, region->boundary[i]);
-                if (PointInSegment(intersection, region->boundary[i]))
-                {
-                    intersections[numIntersections] = intersection;
-                    indexes[numIntersections] = i;
-                    numIntersections += 1;
-                }
+                intersections[numIntersections] = intersection;
+                indexes[numIntersections] = i;
+                numIntersections += 1;
             }
         }
         assert(numIntersections == 2);
@@ -66,7 +64,7 @@ BuildBspRegion(usize width, usize height, Segment initialLine)
 }
 
 BspRegion *
-NewBspRegion(const BspRegion *oldRegion, const Segment *segments, usize numSegments, SplitDirection dir)
+NewBspRegion(BspRegion *oldRegion, Segment *segments, usize numSegments, SplitDirection dir)
 {
     BspRegion *newRegion = (BspRegion *)malloc(sizeof(BspRegion));
 
@@ -85,7 +83,7 @@ NewBspRegion(const BspRegion *oldRegion, const Segment *segments, usize numSegme
             leftIdx = oldRegion->rightIdx;
             rightIdx = oldRegion->leftIdx;
         }
-        else
+        else /* dir == SplitLeft */
         {
             line = oldRegion->line;
             leftIdx = oldRegion->leftIdx;
@@ -127,30 +125,28 @@ NewBspRegion(const BspRegion *oldRegion, const Segment *segments, usize numSegme
        * create new active segment from newLine (if it exists)
        * (also make sure it only intersects 2 boundary lines)
        */
-        DVector2 intersections[5];
-        usize indexes[5];
+        DVector2 intersections[2];
+        usize indexes[2];
         usize numIntersections = 0;
         for (usize i = 0; i < newRegion->boundarySize; i++)
         {
-            if (!SegmentsParallel(segments[0], newRegion->boundary[i]))
+            if (SegmentsParallel(segments[0], newRegion->boundary[i])) continue;
+            DVector2 intersection = SegmentIntersection(segments[0], newRegion->boundary[i]);
+            if (SegmentContainsPoint(newRegion->boundary[i], intersection))
             {
-                DVector2 intersection = SegmentIntersection(segments[0], newRegion->boundary[i]);
-                if (PointInSegment(intersection, newRegion->boundary[i]))
-                {
-                    intersections[numIntersections] = intersection;
-                    indexes[numIntersections] = i;
-                    numIntersections += 1;
-                }
+                intersections[numIntersections] = intersection;
+                indexes[numIntersections] = i;
+                numIntersections += 1;
             }
         }
-        /* assert(numIntersections == 2); */
-        if (numIntersections == 2)
-        {
-            newRegion->line.left = intersections[0];
-            newRegion->leftIdx = indexes[0];
-            newRegion->line.right = intersections[1];
-            newRegion->rightIdx = indexes[1];
-        }
+        assert(numIntersections == 2);
+        newRegion->line.left = intersections[0];
+        newRegion->leftIdx = indexes[0];
+        newRegion->line.right = intersections[1];
+        newRegion->rightIdx = indexes[1];
+
+        /* split line and node segment(s) go in opposing directions */
+        if (SegmentsDotProduct(segments[0], newRegion->line) < 0) flipSplit(newRegion);
     }
 
     return newRegion;
@@ -167,9 +163,17 @@ void
 DrawBspRegion(BspRegion *region)
 {
     for (usize i = 0; i < region->boundarySize; i++)
-    {
-        Segment s = region->boundary[i];
-        DrawLineEx((Vector2){ s.left.x, s.left.y }, (Vector2){ s.right.x, s.right.y }, 5.0f, BLUE);
-    }
-    DrawLineEx((Vector2){ region->line.left.x, region->line.left.y }, (Vector2){ region->line.right.x, region->line.right.y }, 5.0f, RED);
+        DrawSegment(region->boundary[i], 5.0f, BLUE, false);
+    DrawSegment(region->line, 5.0f, RED, false);
+}
+
+void
+flipSplit(BspRegion *region)
+{
+    DVector2 tmp = region->line.left;
+    usize tmpIdx = region->leftIdx;
+    region->line.left = region->line.right;
+    region->leftIdx = region->rightIdx;
+    region->line.right = tmp;
+    region->rightIdx = tmpIdx;
 }

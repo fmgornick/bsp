@@ -20,8 +20,10 @@ typedef enum SplitDirection {
 } SplitDirection;
 
 BspRegion *BuildBspRegion(usize width, usize height, Segment initialLine);
-BspRegion *NewBspRegion(const BspRegion *oldRegion, const Segment *newLine, usize numSegments, SplitDirection dir);
+BspRegion *NewBspRegion(BspRegion *oldRegion, Segment *newLine, usize numSegments, SplitDirection dir);
 void FreeBspRegion(BspRegion *region);
 void DrawBspRegion(BspRegion *region);
+
+void flipSplit(BspRegion *region);
 
 #endif // BSP_REGION_H_

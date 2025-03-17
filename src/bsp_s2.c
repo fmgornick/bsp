@@ -5,7 +5,6 @@
 #include "bsp_tree.h"
 #include "bsp_utils.h"
 #include "raylib.h"
-#include <stdlib.h>
 
 BSP_Stage
 S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
@@ -37,8 +36,8 @@ S2_Render(S2_Scene *scene)
     BeginDrawing();
     ClearBackground(WHITE);
     DrawSegments(scene->segments, scene->numSegments);
-    DrawBspTreeMeta(scene->tree);
     DrawBspRegion(scene->tree->activeRegion);
+    DrawBspTreeMeta(scene->tree);
     EndDrawing();
 
     return S2_PENDING;
@@ -53,7 +52,7 @@ S2_RenderFailure(S2_Scene *scene)
 void
 S2_Free(S2_Scene *scene)
 {
-    free(scene->segments);
+    FreeSegments(scene->segments);
     FreeBspTreeMeta(scene->tree);
 }
 

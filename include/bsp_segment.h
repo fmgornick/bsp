@@ -3,6 +3,7 @@
 
 #include "f64_vector.h"
 #include "i32_vector.h"
+#include "raylib.h"
 #include <stdbool.h>
 
 typedef struct Segment {
@@ -12,18 +13,24 @@ typedef struct Segment {
     bool splitRight;
 } Segment;
 
-typedef enum SegmentSide {
-    SegmentLeft = 0b01,
-    SegmentRight = 0b10,
-    SegmentInside = 0b11,
-} SegmentSide;
+typedef enum Side {
+    SideLeft,
+    SideRight,
+    SideInside,
+    SideBoth,
+} Side;
 
 Segment *BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size);
+void FreeSegments(Segment *segments);
+void DrawSegment(Segment segment, f32 thick, Color color, bool hasNormal);
 void DrawSegments(Segment *segments, usize len);
 
+f64 SegmentsDotProduct(Segment s1, Segment s2);
+f64 SegmentPointDeterminant(Segment s, DVector2 pt);
+Side SegmentSide(Segment s, DVector2 pt);
+Side SegmentSides(Segment s1, Segment s2);
 DVector2 SegmentIntersection(Segment s1, Segment s2);
-bool PointInSegment(DVector2 pt, Segment s);
-SegmentSide PointSegmentSide(DVector2 pt, Segment s);
+bool SegmentContainsPoint(Segment s, DVector2 pt);
 bool SegmentsParallel(Segment s1, Segment s2);
 
 #endif // BSP_SEGMENT_H_

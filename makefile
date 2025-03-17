@@ -1,3 +1,4 @@
+# FLAGS=-g -fsanitize=address -Wall -Iinclude -I/usr/local/include/raylib
 FLAGS=-g -Wall -Iinclude -I/usr/local/include/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
 
@@ -7,6 +8,7 @@ WEBOBJS=$(patsubst src/%.c,obj/web_%.o,$(SRCS))
 
 # main executable
 bsp: $(OBJS)
+	@# clang -fsanitize=address -o $@ -Iinclude $^ -lraylib
 	clang -o $@ -Iinclude $^ -lraylib
 
 # runs main executable on web
