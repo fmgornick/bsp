@@ -53,6 +53,7 @@ BspNode *MinNode(BspNode *root);
 BspNode *MaxNode(BspNode *root);
 BspNode *PrevNode(BspNode *node);
 BspNode *SuccNode(BspNode *node);
+bool IsLeaf(BspNode *node);
 
 BspNode *bspNode(BspTreeMeta *tree, usize idx);
 usize idxLeft(BspTreeMeta *tree, usize idx);

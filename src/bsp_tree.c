@@ -357,6 +357,12 @@ SuccNode(BspNode *node)
     return tmp->parent;
 }
 
+bool
+IsLeaf(BspNode *node)
+{
+    return (!node->left) && (!node->right);
+}
+
 BspNode *
 bspNode(BspTreeMeta *tree, usize idx)
 {
