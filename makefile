@@ -1,6 +1,7 @@
-# FLAGS=-g -fsanitize=address -Wall -Iinclude -I/usr/local/include/raylib
 FLAGS=-g -Wall -Iinclude -I/usr/local/include/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
+SANITIZE=-fsanitize=address
+# SANITIZE=
 
 SRCS=$(wildcard src/*.c)
 OBJS=$(patsubst src/%.c,obj/%.o,$(SRCS))
@@ -8,8 +9,7 @@ WEBOBJS=$(patsubst src/%.c,obj/web_%.o,$(SRCS))
 
 # main executable
 bsp: $(OBJS)
-	@# clang -fsanitize=address -o $@ -Iinclude $^ -lraylib
-	clang -o $@ -Iinclude $^ -lraylib
+	clang $(SANITIZE) -o $@ -Iinclude $^ -lraylib
 
 # runs main executable on web
 wasm: $(WEBOBJS)
@@ -20,12 +20,12 @@ wasm: $(WEBOBJS)
 # run raylib example files on web (usage: make ex<example number>)
 ex%: examples/%.c
 	@mkdir -p example
-	clang -o example/$@ $(FLAGS) $< -lraylib
+	clang -o example/$@ $(FLAGS) $(SANITIZE) $< -lraylib
 	@example/$@
 
 obj/%.o: src/%.c
 	@mkdir -p obj
-	clang -c $(FLAGS) $< -o $@
+	clang -c $(FLAGS) $(SANITIZE) $< -o $@
 
 obj/web_%.o: src/%.c
 	@mkdir -p obj

@@ -45,6 +45,7 @@ void FreeBspTreeMeta(BspTreeMeta *tree);
 void BuildTreeMetaRegions(BspTreeMeta *tree, usize idx);
 void DrawBspTreeMeta(BspTreeMeta *tree);
 
+void BspTreeMetaSetActive(BspTreeMeta *tree, usize i);
 void BspTreeMetaMoveLeft(BspTreeMeta *tree);
 void BspTreeMetaMoveRight(BspTreeMeta *tree);
 void BspTreeMetaMoveUp(BspTreeMeta *tree);

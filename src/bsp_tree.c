@@ -143,7 +143,6 @@ BuildBspTreeMeta(Segment *segments, usize len, Region region)
         Segment *segmentsCopy = (Segment *)malloc(len * sizeof(Segment));
         memcpy(segmentsCopy, segments, len * sizeof(Segment));
         tree->root = BuildBspTree(segmentsCopy, len, NULL);
-        tree->active = tree->root;
     }
 
     { /* calculate size of tree */
@@ -154,6 +153,9 @@ BuildBspTreeMeta(Segment *segments, usize len, Region region)
             tree->size += 1;
             node = SuccNode(node);
         }
+        tree->active = NULL;
+        tree->activeRegion = NULL;
+        tree->activeIdx = tree->size;
     }
 
     { /* add each node to array for easy indexing (also store node depth) */
@@ -165,7 +167,6 @@ BuildBspTreeMeta(Segment *segments, usize len, Region region)
             if (node == tree->root)
             {
                 tree->rootIdx = i;
-                tree->activeIdx = i;
                 tree->meta[i].depth = 0;
             }
             else
@@ -228,7 +229,6 @@ BuildBspTreeMeta(Segment *segments, usize len, Region region)
     }
 
     BuildTreeMetaRegions(tree, tree->rootIdx);
-    tree->activeRegion = tree->meta[tree->rootIdx].region;
     return tree;
 }
 
@@ -289,35 +289,55 @@ DrawBspTreeMeta(BspTreeMeta *tree)
 }
 
 void
+BspTreeMetaSetActive(BspTreeMeta *tree, usize i)
+{
+    if (i >= 0 && i < tree->size)
+    {
+        tree->active = tree->meta[i].node;
+        tree->activeRegion = tree->meta[i].region;
+        tree->activeIdx = i;
+    }
+    else
+    {
+        tree->active = NULL;
+        tree->activeRegion = NULL;
+        tree->activeIdx = tree->size;
+    }
+}
+
+void
 BspTreeMetaMoveLeft(BspTreeMeta *tree)
 {
-    if (tree->active->left)
+    if (tree->active && tree->active->left)
     {
+        usize idx = idxLeft(tree, tree->activeIdx);
         tree->active = tree->active->left;
-        tree->activeIdx = idxLeft(tree, tree->activeIdx);
-        tree->activeRegion = tree->meta[tree->activeIdx].region;
+        tree->activeRegion = tree->meta[idx].region;
+        tree->activeIdx = idx;
     }
 }
 
 void
 BspTreeMetaMoveRight(BspTreeMeta *tree)
 {
-    if (tree->active->right)
+    if (tree->active && tree->active->right)
     {
+        usize idx = idxRight(tree, tree->activeIdx);
         tree->active = tree->active->right;
-        tree->activeIdx = idxRight(tree, tree->activeIdx);
-        tree->activeRegion = tree->meta[tree->activeIdx].region;
+        tree->activeRegion = tree->meta[idx].region;
+        tree->activeIdx = idx;
     }
 }
 
 void
 BspTreeMetaMoveUp(BspTreeMeta *tree)
 {
-    if (tree->active->parent)
+    if (tree->active && tree->active->parent)
     {
+        usize idx = idxParent(tree, tree->activeIdx);
         tree->active = tree->active->parent;
-        tree->activeIdx = idxParent(tree, tree->activeIdx);
-        tree->activeRegion = tree->meta[tree->activeIdx].region;
+        tree->activeRegion = tree->meta[idx].region;
+        tree->activeIdx = idx;
     }
 }
 

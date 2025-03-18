@@ -102,7 +102,7 @@ void
 DrawSegments(Segment *segments, usize len)
 {
     for (usize i = 0; i < len; i++)
-        DrawSegment(segments[i], 2.0f, BLACK, false);
+        DrawSegment(segments[i], 3.0f, BLACK, false);
 }
 
 f64

@@ -58,6 +58,8 @@ BuildBspRegion(usize width, usize height, Segment initialLine)
         region->leftIdx = indexes[0];
         region->line.right = intersections[1];
         region->rightIdx = indexes[1];
+        /* split line and node segment(s) go in opposing directions => flip split line */
+        if (SegmentsDotProduct(initialLine, region->line) < 0) flipSplit(region);
     }
 
     return region;
@@ -144,8 +146,7 @@ NewBspRegion(BspRegion *oldRegion, Segment *segments, usize numSegments, SplitDi
         newRegion->leftIdx = indexes[0];
         newRegion->line.right = intersections[1];
         newRegion->rightIdx = indexes[1];
-
-        /* split line and node segment(s) go in opposing directions */
+        /* split line and node segment(s) go in opposing directions => flip split line */
         if (SegmentsDotProduct(segments[0], newRegion->line) < 0) flipSplit(newRegion);
     }
 
@@ -162,9 +163,12 @@ FreeBspRegion(BspRegion *region)
 void
 DrawBspRegion(BspRegion *region)
 {
-    for (usize i = 0; i < region->boundarySize; i++)
-        DrawSegment(region->boundary[i], 5.0f, BLUE, false);
-    DrawSegment(region->line, 5.0f, RED, false);
+    if (region)
+    {
+        for (usize i = 0; i < region->boundarySize; i++)
+            DrawSegment(region->boundary[i], 5.0f, BLUE, false);
+        DrawSegment(region->line, 5.0f, RED, false);
+    }
 }
 
 void

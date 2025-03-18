@@ -23,6 +23,8 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
     };
     scene->segments = BuildSegments(polygon, numVertices, segmentsRegion, &scene->numSegments);
     scene->tree = BuildBspTreeMeta(scene->segments, scene->numSegments, treeRegion);
+    scene->drawAllRegions = false;
+
     return S2_PENDING;
 }
 
@@ -32,12 +34,24 @@ S2_Render(S2_Scene *scene)
     if (IsKeyPressed(KEY_LEFT)) BspTreeMetaMoveLeft(scene->tree);
     if (IsKeyPressed(KEY_RIGHT)) BspTreeMetaMoveRight(scene->tree);
     if (IsKeyPressed(KEY_UP)) BspTreeMetaMoveUp(scene->tree);
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        Vector2 pos = GetMousePosition();
+        f32 radius = scene->tree->nodeRadius;
+        usize i = 0;
+        for (; i < scene->tree->size; i++)
+            if (CheckCollisionPointCircle(pos, scene->tree->meta[i].pos, radius)) break;
+        BspTreeMetaSetActive(scene->tree, i);
+        scene->drawAllRegions = false;
+    }
+    if (IsKeyPressed(KEY_F)) scene->drawAllRegions = true ^ scene->drawAllRegions;
 
     BeginDrawing();
     ClearBackground(WHITE);
     DrawSegments(scene->segments, scene->numSegments);
-    DrawBspRegion(scene->tree->activeRegion);
     DrawBspTreeMeta(scene->tree);
+    if (scene->drawAllRegions) S2_DrawAllBspRegions(scene);
+    else DrawBspRegion(scene->tree->activeRegion);
     EndDrawing();
 
     return S2_PENDING;
@@ -54,6 +68,22 @@ S2_Free(S2_Scene *scene)
 {
     FreeSegments(scene->segments);
     FreeBspTreeMeta(scene->tree);
+}
+
+void
+S2_DrawAllBspRegions(S2_Scene *scene)
+{
+    BspTreeMetaSetActive(scene->tree, scene->tree->size);
+    for (usize i = 0; i < scene->tree->size; i++)
+    {
+        BspNodeMeta meta = scene->tree->meta[i];
+        if (IsLeaf(meta.node))
+        {
+            for (usize i = 0; i < meta.region->boundarySize; i++)
+                DrawSegment(meta.region->boundary[i], 5.0f, BLACK, false);
+            DrawSegment(meta.region->line, 5.0f, BLACK, false);
+        }
+    }
 }
 
 void
