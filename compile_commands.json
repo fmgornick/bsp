@@ -3,10 +3,181 @@
     "arguments": [
       "/usr/bin/clang",
       "-c",
-      "-Os",
+      "-g",
       "-Wall",
-      "-Iinclude",
+      "-Iinc",
       "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/bsp_region.o",
+      "src/bsp_region.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_region.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_region.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/bsp_s1.o",
+      "src/bsp_s1.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_s1.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_s1.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/bsp_s2.o",
+      "src/bsp_s2.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_s2.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_s2.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/bsp_segment.o",
+      "src/bsp_segment.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_segment.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_segment.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/bsp_tree.o",
+      "src/bsp_tree.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_tree.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_tree.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/bsp_triangle.o",
+      "src/bsp_triangle.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_triangle.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_triangle.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/bsp_utils.o",
+      "src/bsp_utils.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_utils.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_utils.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/dcel.o",
+      "src/dcel.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/dcel.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/dcel.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/f64_vector.o",
+      "src/f64_vector.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/f64_vector.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/f64_vector.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
+      "-o",
+      "obj/i32_vector.o",
+      "src/i32_vector.c"
+    ],
+    "directory": "/Users/Z00B3R5/repos/bsp",
+    "file": "/Users/Z00B3R5/repos/bsp/src/i32_vector.c",
+    "output": "/Users/Z00B3R5/repos/bsp/obj/i32_vector.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-g",
+      "-Wall",
+      "-Iinc",
+      "-I/usr/local/include/raylib",
+      "-fsanitize=address",
       "-o",
       "obj/main.o",
       "src/main.c"
@@ -14,69 +185,5 @@
     "directory": "/Users/Z00B3R5/repos/bsp",
     "file": "/Users/Z00B3R5/repos/bsp/src/main.c",
     "output": "/Users/Z00B3R5/repos/bsp/obj/main.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-Os",
-      "-Wall",
-      "-Iinclude",
-      "-I/usr/local/include/raylib",
-      "-o",
-      "obj/view_2d.o",
-      "src/view_2d.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/view_2d.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/view_2d.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-Os",
-      "-Wall",
-      "-Iinclude",
-      "-I/usr/local/include/raylib",
-      "-o",
-      "obj/view_3d.o",
-      "src/view_3d.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/view_3d.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/view_3d.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-Os",
-      "-Wall",
-      "-Iinclude",
-      "-I/usr/local/include/raylib",
-      "-o",
-      "obj/view_meta.o",
-      "src/view_meta.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/view_meta.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/view_meta.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-Os",
-      "-Wall",
-      "-Iinclude",
-      "-I/usr/local/include/raylib",
-      "-o",
-      "obj/view_tree.o",
-      "src/view_tree.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/view_tree.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/view_tree.o"
   }
 ]

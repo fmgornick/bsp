@@ -52,6 +52,14 @@ S2_Render(S2_Scene *scene)
     DrawBspTreeMeta(scene->tree);
     if (scene->drawAllRegions) S2_DrawAllBspRegions(scene);
     else DrawBspRegion(scene->tree->activeRegion);
+
+    /* { */
+    /*     Vector2 v1 = { .x = 640.0f, .y = 100.0f }; */
+    /*     Vector2 v2 = { .x = 320.0f, .y = 600.0f }; */
+    /*     Vector2 v3 = { .x = 960.0f, .y = 600.0f }; */
+    /*     DrawTriangle(v1, v2, v3, Fade(BLUE, 0.5f)); */
+    /* } */
+
     EndDrawing();
 
     return S2_PENDING;
@@ -80,10 +88,12 @@ S2_DrawAllBspRegions(S2_Scene *scene)
         if (IsLeaf(meta.node))
         {
             for (usize i = 0; i < meta.region->boundarySize; i++)
-                DrawSegment(meta.region->boundary[i], 5.0f, BLACK, false);
-            DrawSegment(meta.region->line, 5.0f, BLACK, false);
+                DrawSegment(meta.region->boundary[i], 4.0f, VIOLET, false);
+            DrawSegment(meta.region->line, 4.0f, VIOLET, false);
         }
     }
+    for (usize i = 0; i < scene->numSegments; i++)
+        DrawSegment(scene->segments[i], 5.0f, BLACK, false);
 }
 
 void

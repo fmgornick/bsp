@@ -1,4 +1,4 @@
-FLAGS=-g -Wall -Iinclude -I/usr/local/include/raylib
+FLAGS=-g -Wall -Iinc -I/usr/local/include/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
 SANITIZE=-fsanitize=address
 # SANITIZE=
@@ -9,7 +9,7 @@ WEBOBJS=$(patsubst src/%.c,obj/web_%.o,$(SRCS))
 
 # main executable
 bsp: $(OBJS)
-	clang $(SANITIZE) -o $@ -Iinclude $^ -lraylib
+	clang $(SANITIZE) -o $@ -Iinc $^ -lraylib
 
 # runs main executable on web
 wasm: $(WEBOBJS)
@@ -33,7 +33,7 @@ obj/web_%.o: src/%.c
 
 # memory check
 check: bsp
-	leaks --atExit -q -- ./bsp
+	MallocStackLogging=YES leaks --atExit -q -- ./bsp
 
 # all unwanted files listed in .gitignore
 clean:
