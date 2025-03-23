@@ -1,5 +1,5 @@
-#ifndef BSP_TRIANGLE_H_
-#define BSP_TRIANGLE_H_
+#ifndef TRIANGULATION_H_
+#define TRIANGULATION_H_
 
 #include "dcel.h"
 
@@ -12,4 +12,4 @@ typedef struct Triangle {
 Triangle *MonotoneTriangulation(Segment *segments, usize numSegments);
 void MonotoneTriangulateDCEL(DCEL *polygon);
 
-#endif // BSP_TRIANGLE_H_
+#endif // TRIANGULATION_H_

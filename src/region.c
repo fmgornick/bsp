@@ -1,17 +1,21 @@
-#include "bsp_region.h"
-#include "bsp_segment.h"
-#include "bsp_triangle.h"
-#include "bsp_utils.h"
+#include "region.h"
+#include "bsp.h"
 #include "f64_vector.h"
 #include "raylib.h"
+#include "segment.h"
+#include "triangulation.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-BspRegion *
-BuildBspRegion(usize width, usize height, Segment initialLine)
+/* ********** helpers ********** */
+void flipSplit(Region *region);
+/* ***************************** */
+
+Region *
+BuildRegion(usize width, usize height, Segment initialLine)
 {
-    BspRegion *region = (BspRegion *)malloc(sizeof(BspRegion));
+    Region *region = (Region *)malloc(sizeof(Region));
 
     { /*
        * create counter-clockwise boundary around provided region
@@ -71,10 +75,10 @@ BuildBspRegion(usize width, usize height, Segment initialLine)
     return region;
 }
 
-BspRegion *
-NewBspRegion(BspRegion *oldRegion, Segment *segments, usize numSegments, SplitDirection dir)
+Region *
+NewRegion(Region *oldRegion, Segment *segments, usize numSegments, SplitDirection dir)
 {
-    BspRegion *newRegion = (BspRegion *)malloc(sizeof(BspRegion));
+    Region *newRegion = (Region *)malloc(sizeof(Region));
 
     Segment line;
     usize leftIdx, rightIdx;
@@ -165,7 +169,7 @@ NewBspRegion(BspRegion *oldRegion, Segment *segments, usize numSegments, SplitDi
 }
 
 void
-FreeBspRegion(BspRegion *region)
+FreeRegion(Region *region)
 {
     free(region->boundary);
     free(region->triangulation);
@@ -173,7 +177,7 @@ FreeBspRegion(BspRegion *region)
 }
 
 void
-DrawBspRegion(BspRegion *region)
+DrawRegion(Region *region)
 {
     if (region)
     {
@@ -189,7 +193,7 @@ DrawBspRegion(BspRegion *region)
 }
 
 void
-flipSplit(BspRegion *region)
+flipSplit(Region *region)
 {
     DVector2 tmp = region->line.left;
     usize tmpIdx = region->leftIdx;

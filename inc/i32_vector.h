@@ -1,7 +1,7 @@
 #ifndef I32_VECTOR_H_
 #define I32_VECTOR_H_
 
-#include "bsp_utils.h"
+#include "bsp.h"
 #include <stdbool.h>
 
 typedef struct IVector2 {

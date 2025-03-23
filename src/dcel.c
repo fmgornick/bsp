@@ -1,5 +1,5 @@
 #include "dcel.h"
-#include "bsp_utils.h"
+#include "bsp.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

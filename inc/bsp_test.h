@@ -1,7 +1,7 @@
 #ifndef BSP_TEST_H_
 #define BSP_TEST_H_
 
-#include "bsp_utils.h"
+#include "bsp.h"
 #include "i32_vector.h"
 
 /* triangle */

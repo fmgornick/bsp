@@ -1,9 +1,9 @@
 #ifndef DCEL_H_
 #define DCEL_H_
 
-#include "bsp_segment.h"
-#include "bsp_utils.h"
+#include "bsp.h"
 #include "f64_vector.h"
+#include "segment.h"
 
 typedef struct VertexEntry VertexEntry;
 typedef struct FaceEntry FaceEntry;

@@ -1,21 +1,27 @@
-#include "bsp_s2.h"
-#include "bsp_region.h"
-#include "bsp_segment.h"
-#include "bsp_stages.h"
+#include "s2.h"
+#include "bsp.h"
 #include "bsp_tree.h"
-#include "bsp_utils.h"
 #include "raylib.h"
+#include "region.h"
+#include "segment.h"
+#include "triangulation.h"
 
-BSP_Stage
-S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
+static usize numColors = 18;
+static Color colors[18] = {
+    YELLOW,  GOLD, ORANGE,   PINK,   RED,    MAROON,     GREEN, LIME,  DARKGREEN, //
+    SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, //
+};
+
+BspStage
+S2_Init(IVector2 *polygon, usize numVertices, S2 *scene)
 {
-    Region segmentsRegion = {
+    BoundingRegion segmentsRegion = {
         .left = 0,
         .right = WIDTH / 2,
         .top = 0,
         .bottom = HEIGHT,
     };
-    Region treeRegion = {
+    BoundingRegion treeRegion = {
         .left = WIDTH / 2,
         .right = WIDTH,
         .top = 0,
@@ -28,8 +34,8 @@ S2_Init(IVector2 *polygon, usize numVertices, S2_Scene *scene)
     return S2_PENDING;
 }
 
-BSP_Stage
-S2_Render(S2_Scene *scene)
+BspStage
+S2_Render(S2 *scene)
 {
     if (IsKeyPressed(KEY_LEFT)) BspTreeMetaMoveLeft(scene->tree);
     if (IsKeyPressed(KEY_RIGHT)) BspTreeMetaMoveRight(scene->tree);
@@ -51,7 +57,7 @@ S2_Render(S2_Scene *scene)
     DrawSegments(scene->segments, scene->numSegments);
     DrawBspTreeMeta(scene->tree);
     if (scene->drawAllRegions) S2_DrawAllBspRegions(scene);
-    else DrawBspRegion(scene->tree->activeRegion);
+    else DrawRegion(scene->tree->activeRegion);
 
     /* { */
     /*     Vector2 v1 = { .x = 640.0f, .y = 100.0f }; */
@@ -65,21 +71,21 @@ S2_Render(S2_Scene *scene)
     return S2_PENDING;
 }
 
-BSP_Stage
-S2_RenderFailure(S2_Scene *scene)
+BspStage
+S2_RenderFailure(S2 *scene)
 {
     return S2_FAILED;
 }
 
 void
-S2_Free(S2_Scene *scene)
+S2_Free(S2 *scene)
 {
     FreeSegments(scene->segments);
     FreeBspTreeMeta(scene->tree);
 }
 
 void
-S2_DrawAllBspRegions(S2_Scene *scene)
+S2_DrawAllBspRegions(S2 *scene)
 {
     BspTreeMetaSetActive(scene->tree, scene->tree->size);
     for (usize i = 0; i < scene->tree->size; i++)
@@ -87,9 +93,11 @@ S2_DrawAllBspRegions(S2_Scene *scene)
         BspNodeMeta meta = scene->tree->meta[i];
         if (IsLeaf(meta.node))
         {
-            for (usize i = 0; i < meta.region->boundarySize; i++)
-                DrawSegment(meta.region->boundary[i], 4.0f, VIOLET, false);
-            DrawSegment(meta.region->line, 4.0f, VIOLET, false);
+            for (usize j = 0; j < meta.region->triangulationSize; j++)
+            {
+                Triangle t = meta.region->triangulation[j];
+                DrawTriangle(t.v1, t.v2, t.v3, Fade(colors[i % numColors], 0.5f));
+            }
         }
     }
     for (usize i = 0; i < scene->numSegments; i++)

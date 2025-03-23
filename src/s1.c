@@ -1,20 +1,19 @@
-#include "bsp_s1.h"
-#include "bsp_stages.h"
-#include "bsp_utils.h"
+#include "bsp.h"
 #include "i32_vector.h"
 #include "raylib.h"
+#include "s1.h"
 
-BSP_Stage
-S1_Init(S1_Scene *scene)
+BspStage
+S1_Init(S1 *scene)
 {
     S1_GridInit(scene);
     return S1_PENDING;
 }
 
-BSP_Stage
-S1_Render(S1_Scene *scene)
+BspStage
+S1_Render(S1 *scene)
 {
-    BSP_Stage nextStage = S1_PENDING;
+    BspStage nextStage = S1_PENDING;
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
@@ -41,8 +40,8 @@ S1_Render(S1_Scene *scene)
     return nextStage;
 }
 
-BSP_Stage
-S1_RenderFailure(S1_Scene *scene)
+BspStage
+S1_RenderFailure(S1 *scene)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -64,12 +63,12 @@ S1_RenderFailure(S1_Scene *scene)
 }
 
 void
-S1_Free(S1_Scene *scene)
+S1_Free(S1 *scene)
 {
 }
 
 void
-S1_GridInit(S1_Scene *scene)
+S1_GridInit(S1 *scene)
 {
     for (usize i = 0; i < ROWS; i++)
         for (usize j = 0; j < COLS; j++)
@@ -78,7 +77,7 @@ S1_GridInit(S1_Scene *scene)
 }
 
 void
-S1_DrawCells(S1_Scene *scene)
+S1_DrawCells(S1 *scene)
 {
     for (usize i = 0; i < ROWS; i++)
     {
@@ -96,7 +95,7 @@ S1_DrawCells(S1_Scene *scene)
 }
 
 void
-S1_UpdateActiveCell(S1_Scene *scene)
+S1_UpdateActiveCell(S1 *scene)
 {
     Vector2 mouse = GetMousePosition();
     i32 i = mouse.y / CELL_HEIGHT;
@@ -114,7 +113,7 @@ S1_UpdateActiveCell(S1_Scene *scene)
 }
 
 void
-S1_DrawPolygon(S1_Scene *scene)
+S1_DrawPolygon(S1 *scene)
 {
     if (scene->numVertices >= 2)
     {
@@ -137,7 +136,7 @@ S1_DrawPolygon(S1_Scene *scene)
 }
 
 bool
-S1_IntersectingPolygon(S1_Scene *scene)
+S1_IntersectingPolygon(S1 *scene)
 {
     /* can't intersect if there's no line to intersect */
     if (scene->numVertices <= 1) return false;

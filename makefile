@@ -1,7 +1,7 @@
-FLAGS=-g -Wall -Iinc -I/usr/local/include/raylib
+FLAGS=-O3 -Wall -Iinc -I/usr/local/include/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
-SANITIZE=-fsanitize=address
-# SANITIZE=
+# SANITIZE=-fsanitize=address
+SANITIZE=
 
 SRCS=$(wildcard src/*.c)
 OBJS=$(patsubst src/%.c,obj/%.o,$(SRCS))

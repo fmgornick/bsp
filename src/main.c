@@ -1,15 +1,15 @@
-#include "bsp_s1.h"
-#include "bsp_s2.h"
-#include "bsp_stages.h"
+#include "bsp.h"
 #include "bsp_test.h"
 #include "raylib.h"
+#include "s1.h"
+#include "s2.h"
 
 isize
 main(isize argc, char *argv[])
 {
-    BSP_Stage stage = S2_INITIALIZING;
-    S1_Scene s1 = { 0 };
-    S2_Scene s2 = { 0 };
+    BspStage stage = S2_INITIALIZING;
+    S1 s1 = { 0 };
+    S2 s2 = { 0 };
 
     /* SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT); */
     InitWindow(WIDTH, HEIGHT, "csci 8442 bsp demo");

@@ -1,9 +1,8 @@
 #include "bsp_tree.h"
-#include "bsp_region.h"
-#include "bsp_segment.h"
-#include "bsp_utils.h"
+#include "bsp.h"
 #include "f64_vector.h"
 #include "raylib.h"
+#include "segment.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -135,7 +134,7 @@ FreeBspTree(BspNode *node)
 }
 
 BspTreeMeta *
-BuildBspTreeMeta(Segment *segments, usize len, Region region)
+BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region)
 {
     BspTreeMeta *tree = (BspTreeMeta *)malloc(sizeof(BspTreeMeta));
 
@@ -228,7 +227,7 @@ BuildBspTreeMeta(Segment *segments, usize len, Region region)
         }
     }
 
-    BuildTreeMetaRegions(tree, tree->rootIdx);
+    BuildTreeRegions(tree, tree->rootIdx);
     return tree;
 }
 
@@ -236,30 +235,30 @@ void
 FreeBspTreeMeta(BspTreeMeta *tree)
 {
     for (usize i = 0; i < tree->size; i++)
-        FreeBspRegion(tree->meta[i].region);
+        FreeRegion(tree->meta[i].region);
     FreeBspTree(tree->root);
     free(tree->meta);
     free(tree);
 }
 
 void
-BuildTreeMetaRegions(BspTreeMeta *tree, usize idx)
+BuildTreeRegions(BspTreeMeta *tree, usize idx)
 {
     BspNode *node = bspNode(tree, idx);
     if (node)
     {
-        if (node == tree->root) tree->meta[idx].region = BuildBspRegion(WIDTH / 2, HEIGHT, node->segments[0]);
+        if (node == tree->root) tree->meta[idx].region = BuildRegion(WIDTH / 2, HEIGHT, node->segments[0]);
         else
         {
             BspNode *parent = bspNode(tree, idxParent(tree, idx));
-            BspRegion *parentRegion = tree->meta[idxParent(tree, idx)].region;
+            Region *parentRegion = tree->meta[idxParent(tree, idx)].region;
             {
-                if (node == parent->left) tree->meta[idx].region = NewBspRegion(parentRegion, node->segments, node->numSegments, SplitLeft);
-                else if (node == parent->right) tree->meta[idx].region = NewBspRegion(parentRegion, node->segments, node->numSegments, SplitRight);
+                if (node == parent->left) tree->meta[idx].region = NewRegion(parentRegion, node->segments, node->numSegments, SplitLeft);
+                else if (node == parent->right) tree->meta[idx].region = NewRegion(parentRegion, node->segments, node->numSegments, SplitRight);
             }
         }
-        BuildTreeMetaRegions(tree, idxLeft(tree, idx));
-        BuildTreeMetaRegions(tree, idxRight(tree, idx));
+        BuildTreeRegions(tree, idxLeft(tree, idx));
+        BuildTreeRegions(tree, idxRight(tree, idx));
     }
 }
 

@@ -1,5 +1,5 @@
-#ifndef BSP_SEGMENT_H_
-#define BSP_SEGMENT_H_
+#ifndef SEGMENT_H_
+#define SEGMENT_H_
 
 #include "f64_vector.h"
 #include "i32_vector.h"
@@ -20,7 +20,7 @@ typedef enum Side {
     SideBoth,
 } Side;
 
-Segment *BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size);
+Segment *BuildSegments(IVector2 *polygon, usize numVertices, BoundingRegion region, usize *size);
 void FreeSegments(Segment *segments);
 void DrawSegment(Segment segment, f32 thick, Color color, bool hasNormal);
 void DrawSegments(Segment *segments, usize len);
@@ -33,4 +33,4 @@ DVector2 SegmentIntersection(Segment s1, Segment s2);
 bool SegmentContainsPoint(Segment s, DVector2 pt);
 bool SegmentsParallel(Segment s1, Segment s2);
 
-#endif // BSP_SEGMENT_H_
+#endif // SEGMENT_H_

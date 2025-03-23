@@ -1,10 +1,10 @@
 #ifndef BSP_TREE_H_
 #define BSP_TREE_H_
 
-#include "bsp_region.h"
-#include "bsp_segment.h"
-#include "bsp_utils.h"
+#include "bsp.h"
 #include "raylib.h"
+#include "region.h"
+#include "segment.h"
 #include <stdbool.h>
 
 typedef struct BspNode {
@@ -16,33 +16,33 @@ typedef struct BspNode {
 } BspNode;
 
 typedef struct BspNodeMeta {
-    BspNode *node;     /* associated node in BSP tree */
-    BspRegion *region; /* visual region associated with node */
-    usize depth;       /* depth in tree (root=0) */
-    Vector2 pos;       /* position of node for visualization */
-    usize left;        /* index of left child (if exists) */
-    usize right;       /* index of right child (if exists) */
-    usize parent;      /* index of parent (if exists) */
+    BspNode *node;  /* associated node in BSP tree */
+    Region *region; /* visual region associated with node */
+    usize depth;    /* depth in tree (root=0) */
+    Vector2 pos;    /* position of node for visualization */
+    usize left;     /* index of left child (if exists) */
+    usize right;    /* index of right child (if exists) */
+    usize parent;   /* index of parent (if exists) */
 } BspNodeMeta;
 
 typedef struct BspTreeMeta {
-    usize height;            /* height of tree */
-    usize size;              /* size of tree */
-    BspNodeMeta *meta;       /* array of node metadata (sorted left -> right) */
-    BspNode *root;           /* pointer to root node of tree */
-    BspNode *active;         /* pointer to active node in tree */
-    usize rootIdx;           /* index of root node metadata in array */
-    usize activeIdx;         /* index of active node metadata in array */
-    BspRegion *activeRegion; /* current active region in BSP tree */
-    f32 nodeRadius;          /* radius of BSP node for displaying (dependent on tree/region size) */
+    usize height;         /* height of tree */
+    usize size;           /* size of tree */
+    BspNodeMeta *meta;    /* array of node metadata (sorted left -> right) */
+    BspNode *root;        /* pointer to root node of tree */
+    BspNode *active;      /* pointer to active node in tree */
+    usize rootIdx;        /* index of root node metadata in array */
+    usize activeIdx;      /* index of active node metadata in array */
+    Region *activeRegion; /* current active region in BSP tree */
+    f32 nodeRadius;       /* radius of BSP node for displaying (dependent on tree/region size) */
 } BspTreeMeta;
 
 BspNode *BuildBspTree(Segment *segments, usize len, BspNode *parent);
 void FreeBspTree(BspNode *node);
 
-BspTreeMeta *BuildBspTreeMeta(Segment *segments, usize len, Region region);
+BspTreeMeta *BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region);
 void FreeBspTreeMeta(BspTreeMeta *tree);
-void BuildTreeMetaRegions(BspTreeMeta *tree, usize idx);
+void BuildTreeRegions(BspTreeMeta *tree, usize idx);
 void DrawBspTreeMeta(BspTreeMeta *tree);
 
 void BspTreeMetaSetActive(BspTreeMeta *tree, usize i);

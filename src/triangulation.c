@@ -1,14 +1,14 @@
-#include "bsp_triangle.h"
-#include "bsp_utils.h"
+#include "bsp.h"
 #include "dcel.h"
 #include "f64_vector.h"
 #include "raymath.h"
+#include "triangulation.h"
 #include <assert.h>
 #include <stdlib.h>
 
-/* helpers */
+/* ******************* helpers ******************* */
 i32 vtxcmp(const VertexEntry u, const VertexEntry v);
-/* helpers */
+/* *********************************************** */
 
 Triangle *
 MonotoneTriangulation(Segment *segments, usize numSegments)
