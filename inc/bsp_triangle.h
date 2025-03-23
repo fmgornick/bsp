@@ -1,17 +1,15 @@
 #ifndef BSP_TRIANGLE_H_
 #define BSP_TRIANGLE_H_
 
-#include "bsp_segment.h"
 #include "dcel.h"
-#include "f64_vector.h"
 
 typedef struct Triangle {
-    DVector2 x;
-    DVector2 y;
-    DVector2 z;
+    Vector2 v1;
+    Vector2 v2;
+    Vector2 v3;
 } Triangle;
 
-Triangle *MonotoneTriangulation(Segment *edges, usize numEdges);
-void MonotoneTriangulate(DCEL *polygon);
+Triangle *MonotoneTriangulation(Segment *segments, usize numSegments);
+void MonotoneTriangulateDCEL(DCEL *polygon);
 
 #endif // BSP_TRIANGLE_H_

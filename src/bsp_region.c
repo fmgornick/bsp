@@ -1,5 +1,6 @@
 #include "bsp_region.h"
 #include "bsp_segment.h"
+#include "bsp_triangle.h"
 #include "bsp_utils.h"
 #include "f64_vector.h"
 #include "raylib.h"
@@ -60,6 +61,11 @@ BuildBspRegion(usize width, usize height, Segment initialLine)
         region->rightIdx = indexes[1];
         /* split line and node segment(s) go in opposing directions => flip split line */
         if (SegmentsDotProduct(initialLine, region->line) < 0) flipSplit(region);
+    }
+
+    { /* triangulate region */
+        region->triangulation = MonotoneTriangulation(region->boundary, region->boundarySize);
+        region->triangulationSize = region->boundarySize - 2;
     }
 
     return region;
@@ -150,6 +156,11 @@ NewBspRegion(BspRegion *oldRegion, Segment *segments, usize numSegments, SplitDi
         if (SegmentsDotProduct(segments[0], newRegion->line) < 0) flipSplit(newRegion);
     }
 
+    { /* triangulate region */
+        newRegion->triangulation = MonotoneTriangulation(newRegion->boundary, newRegion->boundarySize);
+        newRegion->triangulationSize = newRegion->boundarySize - 2;
+    }
+
     return newRegion;
 }
 
@@ -157,6 +168,7 @@ void
 FreeBspRegion(BspRegion *region)
 {
     free(region->boundary);
+    free(region->triangulation);
     free(region);
 }
 
@@ -165,9 +177,14 @@ DrawBspRegion(BspRegion *region)
 {
     if (region)
     {
+        for (usize i = 0; i < region->triangulationSize; i++)
+        {
+            Triangle t = region->triangulation[i];
+            DrawTriangle(t.v1, t.v2, t.v3, Fade(BLUE, 0.5f));
+        }
         for (usize i = 0; i < region->boundarySize; i++)
-            DrawSegment(region->boundary[i], 5.0f, BLUE, false);
-        DrawSegment(region->line, 5.0f, RED, false);
+            DrawSegment(region->boundary[i], 3.0f, BLUE, false);
+        DrawSegment(region->line, 3.0f, RED, false);
     }
 }
 

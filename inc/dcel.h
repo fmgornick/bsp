@@ -28,6 +28,22 @@ typedef struct HalfEdgeEntry {
     HalfEdgeEntry *prev;
 } HalfEdgeEntry;
 
+/*
+ * this datastructure does not cover all cases needed to be a proper DCEL...
+ *
+ * 1. assumes no holes, only the unbounded face has inner components
+ * 2. inner component size assumed to be 1 (still malloc it tho *shrug*)
+ * 3. assumes at least 3 edges (6 half-edges)
+ * 4. assumes graph stored follows euler's formula
+ * 5. assumes when adding a diagonal, it's an actual diagonal and the two
+ *    vertices provided share an incident face
+ *    i.  it will loop infinitely if diagonals aren't proper
+ *        (diagonals only added in triangulation alg tho so no worries)
+ *
+ * i know this isn't all that ideal, but currently this is only getting used
+ * for triangluating BSP tree regions which are all convex with around 4-6
+ * edges so i didn't really care to make it full-proof
+ */
 typedef struct DCEL {
     VertexEntry **vertices;
     FaceEntry **faces;
@@ -41,7 +57,7 @@ typedef struct DCEL {
 } DCEL;
 
 DCEL *NewDCEL(usize numVertices, usize numFaces, usize numEdges);
-DCEL *BuildSimpleDCEL(Segment *edges, usize numEdges);
+DCEL *BuildSimpleDCEL(Segment *segments, usize numSegments);
 void FreeDCEL(DCEL *dcel);
 
 void ResizeDCEL(DCEL *dcel, usize numVertices, usize numFaces, usize numHalfEdges);

@@ -4,81 +4,35 @@
 #include "f64_vector.h"
 #include "raymath.h"
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 /* helpers */
 i32 vtxcmp(const VertexEntry u, const VertexEntry v);
 /* helpers */
 
 Triangle *
-MonotoneTriangulation(Segment *edges, usize numEdges)
+MonotoneTriangulation(Segment *segments, usize numSegments)
 {
-    /* vertex array stores index of associated edge (corresponds to left endpoint) */
-    assert(numEdges >= 3);
-    usize numVertices = numEdges;
-    usize *vertices = (usize *)malloc(numVertices * sizeof(usize));
-
-    usize topIdx = 0;
-    usize bottomIdx = 0;
-
-    { /*
-       * construct vertex array sorted by y-coordinate
-       *  - we can take advantage of the fact that the polygon is y-monotone to sort the edges in
-       *    linear time
-       *  - simply find the vertex with the largest y-coordinate and, cascade down the left/right
-       *    chains, adding the vertex with the higher vertex at each step until we reach the bottom
-       *    vertex
-       */
-        usize vertexIdx = 0;
-        for (usize i = 0; i < numEdges; i++)
-        {
-            if (edges[i].left.y > edges[topIdx].left.y) topIdx = i;
-            else if (edges[i].left.y == edges[topIdx].left.y && edges[i].left.x < edges[topIdx].left.x) topIdx = i;
-            if (edges[i].left.y < edges[bottomIdx].left.y) bottomIdx = i;
-            else if (edges[i].left.y == edges[topIdx].left.y && edges[i].left.x > edges[bottomIdx].left.x) topIdx = i;
-        }
-        vertices[vertexIdx++] = topIdx;
-        usize leftIdx = mod(topIdx + 1, numVertices);
-        usize rightIdx = mod(topIdx - 1, numVertices);
-        while (leftIdx != rightIdx)
-        {
-            if (edges[leftIdx].left.y > edges[rightIdx].left.y
-                || (edges[leftIdx].left.y == edges[rightIdx].left.y && edges[leftIdx].left.x < edges[rightIdx].left.x))
-            {
-                vertices[vertexIdx++] = leftIdx;
-                leftIdx = mod(leftIdx + 1, numVertices);
-            }
-            else
-            {
-                vertices[vertexIdx++] = rightIdx;
-                rightIdx = mod(rightIdx - 1, numVertices);
-            }
-        }
-        vertices[vertexIdx++] = bottomIdx;
-        for (usize i = 0; i < numVertices; i++)
-        {
-            DVector2 v = edges[vertices[i]].left;
-            printf("x: %.2lf\ty: %.2lf\n", v.x, v.y);
-        }
-    }
-
+    DCEL *dcel = BuildSimpleDCEL(segments, numSegments);
+    MonotoneTriangulateDCEL(dcel);
+    Triangle *triangles = (Triangle *)malloc((dcel->numFaces - 1) * sizeof(Triangle));
+    for (usize i = 1; i < dcel->numFaces; i++)
     {
-        usize *stack = (usize *)malloc(numVertices * sizeof(usize));
-        usize stackIdx = 0;
-        stack[stackIdx++] = vertices[0];
-        stack[stackIdx++] = vertices[1];
-        for (usize i = 2; i < numVertices - 1; i++)
-        {
-        }
+        DVector2 v1 = dcel->faces[i]->outerComponent->prev->origin->coordinates;
+        DVector2 v2 = dcel->faces[i]->outerComponent->origin->coordinates;
+        DVector2 v3 = dcel->faces[i]->outerComponent->next->origin->coordinates;
+        triangles[i - 1] = (Triangle){
+            .v1 = (Vector2){ v1.x, v1.y },
+            .v2 = (Vector2){ v2.x, v2.y },
+            .v3 = (Vector2){ v3.x, v3.y },
+        };
     }
-
-    return NULL;
+    FreeDCEL(dcel);
+    return triangles;
 }
 
 void
-MonotoneTriangulate(DCEL *dcel)
+MonotoneTriangulateDCEL(DCEL *dcel)
 {
     { /*
        * euler's formula          : f - e + n == 2
@@ -195,7 +149,10 @@ MonotoneTriangulate(DCEL *dcel)
 
 i32
 vtxcmp(const VertexEntry u, const VertexEntry v)
-{
+{ /*
+   * y-coordinates different => larger y-coordinate bigger
+   * y-coordinates the same => smaller x-coordinate bigger
+   */
     f64 dy = u.coordinates.y - v.coordinates.y;
     if (babs(dy) < EPSILON)
     {

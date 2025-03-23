@@ -200,9 +200,6 @@ AddDiagonalDCEL(DCEL *dcel, VertexEntry *v1, VertexEntry *v2)
 
     dcel->openHalfEdge += 2;
     dcel->openFace += 1;
-
-    PrintDCEL(dcel);
-    printf("\n");
 }
 
 void
