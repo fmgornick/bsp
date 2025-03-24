@@ -1,4 +1,5 @@
 #include "segment.h"
+#include "bsp.h"
 #include "f64_vector.h"
 #include "i32_vector.h"
 #include "raylib.h"
@@ -9,7 +10,7 @@
 #include <stdlib.h>
 
 Segment *
-BuildSegments(IVector2 *polygon, usize numVertices, Region region, usize *size)
+BuildSegments(IVector2 *polygon, usize numVertices, BoundingRegion region, usize *size)
 {
     u32 width = region.right - region.left;
     u32 height = region.bottom - region.top;
@@ -127,7 +128,7 @@ SegmentSide(Segment s, DVector2 pt)
     DVector2 pq = DVector2Subtract(s.right, s.left);
     DVector2 pr = DVector2Subtract(pt, s.left);
     f64 det = DVector2Determinant(pq, pr);
-    if (babs(det) < EPSILON) return SideInside;
+    if (babs(det) < BSP_EPSILON) return SideInside;
     else if (det >= 0.0) return SideLeft;
     else return SideRight;
 }
@@ -140,9 +141,9 @@ SegmentSides(Segment u, Segment v)
     DVector2 ps = DVector2Subtract(v.right, u.left);
     f64 leftSide = DVector2Determinant(pq, pr);
     f64 rightSide = DVector2Determinant(pq, ps);
-    if (babs(leftSide) < EPSILON && babs(rightSide) < EPSILON) return SideInside;
-    else if (leftSide + EPSILON > 0 && rightSide + EPSILON > 0) return SideLeft;
-    else if (leftSide - EPSILON < 0 && rightSide - EPSILON < 0) return SideRight;
+    if (babs(leftSide) < BSP_EPSILON && babs(rightSide) < BSP_EPSILON) return SideInside;
+    else if (leftSide + BSP_EPSILON > 0 && rightSide + BSP_EPSILON > 0) return SideLeft;
+    else if (leftSide - BSP_EPSILON < 0 && rightSide - BSP_EPSILON < 0) return SideRight;
     else return SideBoth;
 }
 
@@ -178,11 +179,11 @@ SegmentContainsPoint(Segment s, DVector2 pt)
     f64 a = s.right.y - s.left.y;
     f64 b = s.left.x - s.right.x;
     f64 c = (s.right.x * s.left.y) - (s.left.x * s.right.y);
-    if (babs(a * pt.x + b * pt.y + c) > EPSILON) return false;
-    if (pt.x < (min(s.left.x, s.right.x) - EPSILON)) return false;
-    if (pt.x > (max(s.left.x, s.right.x) + EPSILON)) return false;
-    if (pt.y < (min(s.left.y, s.right.y) - EPSILON)) return false;
-    if (pt.y > (max(s.left.y, s.right.y) + EPSILON)) return false;
+    if (babs(a * pt.x + b * pt.y + c) > BSP_EPSILON) return false;
+    if (pt.x < (min(s.left.x, s.right.x) - BSP_EPSILON)) return false;
+    if (pt.x > (max(s.left.x, s.right.x) + BSP_EPSILON)) return false;
+    if (pt.y < (min(s.left.y, s.right.y) - BSP_EPSILON)) return false;
+    if (pt.y > (max(s.left.y, s.right.y) + BSP_EPSILON)) return false;
     return true;
 }
 
@@ -191,5 +192,5 @@ SegmentsParallel(Segment s1, Segment s2)
 {
     DVector2 pq = DVector2Subtract(s1.right, s1.left);
     DVector2 rs = DVector2Subtract(s2.right, s2.left);
-    return babs(DVector2Determinant(pq, rs)) < EPSILON;
+    return babs(DVector2Determinant(pq, rs)) < BSP_EPSILON;
 }

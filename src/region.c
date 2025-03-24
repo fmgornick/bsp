@@ -6,6 +6,7 @@
 #include "triangulation.h"
 #include <assert.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 /* ********** helpers ********** */
@@ -135,27 +136,31 @@ NewRegion(Region *oldRegion, Segment *segments, usize numSegments, SplitDirectio
     if (numSegments > 0)
     { /*
        * create new active segment from newLine (if it exists)
-       * (also make sure it only intersects 2 boundary lines)
+       *
+       * there's a chance that the intersection is in a corner between two
+       * boundary segments, in which case we just choose one
        */
-        DVector2 intersections[2];
-        usize indexes[2];
-        usize numIntersections = 0;
+        bool intersectedOnce = false;
         for (usize i = 0; i < newRegion->boundarySize; i++)
         {
             if (SegmentsParallel(segments[0], newRegion->boundary[i])) continue;
             DVector2 intersection = SegmentIntersection(segments[0], newRegion->boundary[i]);
             if (SegmentContainsPoint(newRegion->boundary[i], intersection))
             {
-                intersections[numIntersections] = intersection;
-                indexes[numIntersections] = i;
-                numIntersections += 1;
+                if (!intersectedOnce)
+                {
+                    newRegion->line.left = intersection;
+                    newRegion->leftIdx = i;
+                    intersectedOnce = true;
+                }
+                else if (!DVector2DIsEqual(newRegion->line.left, intersection))
+                {
+                    newRegion->line.right = intersection;
+                    newRegion->rightIdx = i;
+                    break;
+                }
             }
         }
-        assert(numIntersections == 2);
-        newRegion->line.left = intersections[0];
-        newRegion->leftIdx = indexes[0];
-        newRegion->line.right = intersections[1];
-        newRegion->rightIdx = indexes[1];
         /* split line and node segment(s) go in opposing directions => flip split line */
         if (SegmentsDotProduct(segments[0], newRegion->line) < 0) flipSplit(newRegion);
     }

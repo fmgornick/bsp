@@ -66,7 +66,7 @@ DVector2Determinant(DVector2 v1, DVector2 v2)
 bool
 DVector2DIsEqual(DVector2 v1, DVector2 v2)
 {
-    return (v1.x == v2.x && v1.y == v2.y);
+    return babs((v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y)) < BSP_EPSILON;
 }
 
 DVector2

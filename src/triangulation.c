@@ -1,8 +1,8 @@
+#include "triangulation.h"
 #include "bsp.h"
 #include "dcel.h"
 #include "f64_vector.h"
 #include "raymath.h"
-#include "triangulation.h"
 #include <assert.h>
 #include <stdlib.h>
 
@@ -154,10 +154,10 @@ vtxcmp(const VertexEntry u, const VertexEntry v)
    * y-coordinates the same => smaller x-coordinate bigger
    */
     f64 dy = u.coordinates.y - v.coordinates.y;
-    if (babs(dy) < EPSILON)
+    if (babs(dy) < BSP_EPSILON)
     {
         f64 dx = u.coordinates.x - v.coordinates.x;
-        if (babs(dx) < EPSILON) return 0;
+        if (babs(dx) < BSP_EPSILON) return 0;
         else return (dx < 0) ? 1 : -1;
     }
     else return (dy > 0) ? 1 : -1;
