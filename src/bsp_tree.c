@@ -137,6 +137,7 @@ BspTreeMeta *
 BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region)
 {
     BspTreeMeta *tree = (BspTreeMeta *)malloc(sizeof(BspTreeMeta));
+    tree->bounds = region;
 
     { /* create actual bsp tree */
         Segment *segmentsCopy = (Segment *)malloc(len * sizeof(Segment));
@@ -171,6 +172,7 @@ BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region)
             else
             {
                 tree->meta[i].depth = 0;
+                tree->meta[i].visible = false;
                 for (BspNode *tmp = node; (tmp->parent != NULL); tmp = tmp->parent)
                     tree->meta[i].depth += 1;
             }
@@ -185,19 +187,19 @@ BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region)
         tree->height = maxDepth + 1;
     }
 
-    { /* calculate node positions and radius for displaying BSP tree nodes to user */
-        u32 width = (region.right - region.left), x0 = region.left;
-        u32 height = (region.bottom - region.top), y0 = region.top;
-        u32 shorter = min(width, height);
-        tree->nodeRadius = (f32)shorter / max(tree->height * 2, tree->size + 1);
+    /* { /1* calculate node positions and radius for displaying BSP tree nodes to user *1/ */
+    /*     u32 width = (region.right - region.left), x0 = region.left; */
+    /*     u32 height = (region.bottom - region.top), y0 = region.top; */
+    /*     u32 shorter = min(width, height); */
+    /*     tree->nodeRadius = (f32)shorter / max(tree->height * 2, tree->size + 1); */
 
-        for (usize i = 0; i < tree->size; i++)
-        {
-            f32 x = tree->nodeRadius + ((f32)i / (tree->size + 1)) * width + x0;
-            f32 y = tree->nodeRadius + tree->meta[i].depth * ((f32)height / tree->height) + y0;
-            tree->meta[i].pos = (Vector2){ x, y };
-        }
-    }
+    /*     for (usize i = 0; i < tree->size; i++) */
+    /*     { */
+    /*         f32 x = tree->nodeRadius + ((f32)i / (tree->size + 1)) * width + x0; */
+    /*         f32 y = tree->nodeRadius + tree->meta[i].depth * ((f32)height / tree->height) + y0; */
+    /*         tree->meta[i].pos = (Vector2){ x, y }; */
+    /*     } */
+    /* } */
 
     { /* find indexes of left/right/parent nodes for quick metadata navigation */
         for (usize i = 0; i < tree->size; i++)
@@ -228,6 +230,15 @@ BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region)
     }
 
     BuildTreeRegions(tree, tree->rootIdx);
+
+    tree->meta[tree->rootIdx].visible = true;
+    tree->numVisible = 1;
+    tree->visibleHeight = 1;
+    tree->active = tree->root;
+    tree->activeIdx = tree->rootIdx;
+    tree->activeRegion = tree->meta[tree->rootIdx].region;
+
+    UpdateBspTreeMeta(tree);
     return tree;
 }
 
@@ -267,23 +278,50 @@ DrawBspTreeMeta(BspTreeMeta *tree)
 {
     for (usize i = 0; i < tree->size; i++)
     {
-        Vector2 node = tree->meta[i].pos;
-        if (tree->meta[i].node->left)
+        BspNodeMeta meta = tree->meta[i];
+        if (meta.visible)
         {
-            Vector2 left = tree->meta[idxLeft(tree, i)].pos;
-            DrawLineEx(node, left, 2.0f, BLACK);
-        }
-        if (tree->meta[i].node->right)
-        {
-            Vector2 right = tree->meta[idxRight(tree, i)].pos;
-            DrawLineEx(node, right, 2.0f, BLACK);
+            Vector2 node = tree->meta[i].pos;
+            if (meta.node->left && tree->meta[meta.left].visible)
+            {
+                Vector2 left = tree->meta[idxLeft(tree, i)].pos;
+                DrawLineEx(node, left, 2.0f, BLACK);
+            }
+            if (meta.node->right && tree->meta[meta.right].visible)
+            {
+                Vector2 right = tree->meta[idxRight(tree, i)].pos;
+                DrawLineEx(node, right, 2.0f, BLACK);
+            }
         }
     }
     for (usize i = 0; i < tree->size; i++)
     {
-        Vector2 node = tree->meta[i].pos;
-        if (i == tree->activeIdx) DrawCircle(node.x, node.y, tree->nodeRadius, RED);
-        else DrawCircle(node.x, node.y, tree->nodeRadius, BLUE);
+        if (tree->meta[i].visible)
+        {
+            Vector2 node = tree->meta[i].pos;
+            if (i == tree->activeIdx) DrawCircle(node.x, node.y, tree->nodeRadius, RED);
+            else DrawCircle(node.x, node.y, tree->nodeRadius, BLUE);
+        }
+    }
+}
+
+void
+UpdateBspTreeMeta(BspTreeMeta *tree)
+{
+    u32 width = (tree->bounds.right - tree->bounds.left), x0 = tree->bounds.left;
+    u32 height = (tree->bounds.bottom - tree->bounds.top), y0 = tree->bounds.top;
+    u32 shorter = min(width, height);
+    tree->nodeRadius = (f32)shorter / max(tree->visibleHeight * 2, tree->numVisible + 1);
+    usize visibleIdx = 0;
+    for (usize i = 0; i < tree->size; i++)
+    {
+        if (tree->meta[i].visible)
+        {
+            f32 x = tree->nodeRadius + ((f32)visibleIdx / (tree->numVisible + 1)) * width + x0;
+            f32 y = tree->nodeRadius + tree->meta[i].depth * ((f32)height / tree->visibleHeight) + y0;
+            tree->meta[i].pos = (Vector2){ x, y };
+            visibleIdx += 1;
+        }
     }
 }
 
@@ -310,9 +348,17 @@ BspTreeMetaMoveLeft(BspTreeMeta *tree)
     if (tree->active && tree->active->left)
     {
         usize idx = idxLeft(tree, tree->activeIdx);
+        BspNodeMeta meta = tree->meta[idx];
         tree->active = tree->active->left;
-        tree->activeRegion = tree->meta[idx].region;
+        tree->activeRegion = meta.region;
         tree->activeIdx = idx;
+        if (!meta.visible)
+        {
+            tree->meta[idx].visible = true;
+            tree->numVisible += 1;
+            tree->visibleHeight = max(meta.depth + 1, tree->visibleHeight);
+            UpdateBspTreeMeta(tree);
+        }
     }
 }
 
@@ -322,9 +368,17 @@ BspTreeMetaMoveRight(BspTreeMeta *tree)
     if (tree->active && tree->active->right)
     {
         usize idx = idxRight(tree, tree->activeIdx);
+        BspNodeMeta meta = tree->meta[idx];
         tree->active = tree->active->right;
         tree->activeRegion = tree->meta[idx].region;
         tree->activeIdx = idx;
+        if (!meta.visible)
+        {
+            tree->meta[idx].visible = true;
+            tree->numVisible += 1;
+            tree->visibleHeight = max(meta.depth + 1, tree->visibleHeight);
+            UpdateBspTreeMeta(tree);
+        }
     }
 }
 

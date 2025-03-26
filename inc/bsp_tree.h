@@ -23,6 +23,7 @@ typedef struct BspNodeMeta {
     usize left;     /* index of left child (if exists) */
     usize right;    /* index of right child (if exists) */
     usize parent;   /* index of parent (if exists) */
+    bool visible;
 } BspNodeMeta;
 
 typedef struct BspTreeMeta {
@@ -35,6 +36,9 @@ typedef struct BspTreeMeta {
     usize activeIdx;      /* index of active node metadata in array */
     Region *activeRegion; /* current active region in BSP tree */
     f32 nodeRadius;       /* radius of BSP node for displaying (dependent on tree/region size) */
+    BoundingRegion bounds;
+    usize numVisible;
+    usize visibleHeight;
 } BspTreeMeta;
 
 BspNode *BuildBspTree(Segment *segments, usize len, BspNode *parent);
@@ -44,6 +48,7 @@ BspTreeMeta *BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion regio
 void FreeBspTreeMeta(BspTreeMeta *tree);
 void BuildTreeRegions(BspTreeMeta *tree, usize idx);
 void DrawBspTreeMeta(BspTreeMeta *tree);
+void UpdateBspTreeMeta(BspTreeMeta *tree);
 
 void BspTreeMetaSetActive(BspTreeMeta *tree, usize i);
 void BspTreeMetaMoveLeft(BspTreeMeta *tree);
