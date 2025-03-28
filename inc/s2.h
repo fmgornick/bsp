@@ -15,6 +15,7 @@ typedef struct S2 {
     f32 buildTreeDt;     /* (pt 1) time from last frame (for automated building) */
     bool treeBuilt;      /* (pt 1) true if tree build demo portion over */
     bool drawAllRegions; /* (pt 2) true if we want to highlight all bsp regions */
+    bool initialized;
 } S2;
 
 BspStage S2_Init(IVector2 *polygon, u32 numVertices, S2 *scene);

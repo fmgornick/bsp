@@ -17,6 +17,7 @@ BspStage
 S1_Init(S1 *scene)
 {
     GridInit(scene);
+    scene->initialized = true;
     return S1_PENDING;
 }
 
@@ -77,6 +78,7 @@ S1_RenderFailure(S1 *scene)
 void
 S1_Free(S1 *scene)
 {
+    scene->initialized = false;
 }
 
 void

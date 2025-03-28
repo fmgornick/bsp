@@ -9,10 +9,10 @@
 /* *********************************** helpers ********************************** */
 /* ****************************************************************************** */
 void DrawAllBspRegions(S2 *scene);
-void BspTreeStepForward(BspTreeMeta *tree);
-void BspTreeStepBack(BspTreeMeta *tree);
-void BspTreeFastForward(BspTreeMeta *tree);
-void BspTreeRewind(BspTreeMeta *tree);
+void BspTreeStepForward(S2 *scene);
+void BspTreeStepBack(S2 *scene);
+void BspTreeFastForward(S2 *scene);
+void BspTreeRewind(S2 *scene);
 
 static usize numColors = 18;
 static Color colors[18] = {
@@ -39,8 +39,11 @@ S2_Init(IVector2 *polygon, usize numVertices, S2 *scene)
     };
     scene->segments = BuildSegments(polygon, numVertices, segmentsRegion, &scene->numSegments);
     scene->tree = BuildBspTreeMeta(scene->segments, scene->numSegments, treeRegion);
+    scene->building = false;
+    scene->buildTreeDt = 0.0f;
     scene->treeBuilt = false;
     scene->drawAllRegions = false;
+    scene->initialized = true;
 
     return S2_PENDING;
 }
@@ -51,45 +54,30 @@ S2_Render(S2 *scene)
     if (!scene->treeBuilt)
     {
         if (IsKeyPressed(KEY_SPACE)) scene->building ^= true;
-        if (IsKeyPressed(KEY_RIGHT))
-        {
-            scene->building = false;
-            BspTreeStepForward(scene->tree);
-        }
-        if (IsKeyPressed(KEY_LEFT))
-        {
-            scene->building = false;
-            BspTreeStepBack(scene->tree);
-        }
-        if (IsKeyPressed(KEY_C))
-        {
-            scene->building = false;
-            BspTreeFastForward(scene->tree);
-        }
-        if (IsKeyPressed(KEY_R))
-        {
-            scene->building = false;
-            BspTreeRewind(scene->tree);
-        }
+        if (IsKeyPressed(KEY_RIGHT)) BspTreeStepForward(scene);
+        if (IsKeyPressed(KEY_LEFT)) BspTreeStepBack(scene);
+        if (IsKeyPressed(KEY_C)) BspTreeFastForward(scene);
+        if (IsKeyPressed(KEY_R)) BspTreeRewind(scene);
         if (scene->building)
         {
             scene->buildTreeDt += GetFrameTime();
             if (scene->buildTreeDt >= 0.3f)
             {
+                BspTreeStepForward(scene);
                 scene->buildTreeDt = 0.0f;
-                BspTreeStepForward(scene->tree);
+                scene->building = true;
             }
         }
         if (IsKeyPressed(KEY_ENTER))
         {
-            BspTreeFastForward(scene->tree);
-            scene->building = false;
+            BspTreeFastForward(scene);
             scene->treeBuilt = true;
             scene->drawAllRegions = true;
         }
     }
     else
     {
+        if (IsKeyPressed(KEY_ENTER)) return S2_COMPLETED;
         if (IsKeyPressed(KEY_LEFT)) BspTreeMetaMoveLeft(scene->tree);
         if (IsKeyPressed(KEY_RIGHT)) BspTreeMetaMoveRight(scene->tree);
         if (IsKeyPressed(KEY_UP)) BspTreeMetaMoveUp(scene->tree);
@@ -128,6 +116,7 @@ S2_Free(S2 *scene)
 {
     FreeSegments(scene->segments);
     FreeBspTreeMeta(scene->tree);
+    scene->initialized = false;
 }
 
 void
@@ -151,8 +140,10 @@ DrawAllBspRegions(S2 *scene)
 }
 
 void
-BspTreeStepForward(BspTreeMeta *tree)
+BspTreeStepForward(S2 *scene)
 {
+    scene->building = false;
+    BspTreeMeta *tree = scene->tree;
     if (tree->activeIdx == tree->size - 1) return;
     if (tree->active->left && !tree->meta[idxLeft(tree, tree->activeIdx)].visible)
     {
@@ -174,8 +165,10 @@ BspTreeStepForward(BspTreeMeta *tree)
 }
 
 void
-BspTreeStepBack(BspTreeMeta *tree)
+BspTreeStepBack(S2 *scene)
 {
+    scene->building = false;
+    BspTreeMeta *tree = scene->tree;
     if (tree->active == tree->root) return;
     if (tree->active->right && tree->meta[idxRight(tree, tree->activeIdx)].visible) BspTreeMetaMoveRight(tree);
     else if (tree->active->right && tree->meta[idxLeft(tree, tree->activeIdx)].visible) BspTreeMetaMoveLeft(tree);
@@ -200,8 +193,10 @@ BspTreeStepBack(BspTreeMeta *tree)
 }
 
 void
-BspTreeFastForward(BspTreeMeta *tree)
+BspTreeFastForward(S2 *scene)
 {
+    scene->building = false;
+    BspTreeMeta *tree = scene->tree;
     for (usize i = 0; i < tree->size; i++)
         tree->meta[i].visible = true;
     tree->visibleSize = tree->size;
@@ -211,8 +206,10 @@ BspTreeFastForward(BspTreeMeta *tree)
 }
 
 void
-BspTreeRewind(BspTreeMeta *tree)
+BspTreeRewind(S2 *scene)
 {
+    scene->building = false;
+    BspTreeMeta *tree = scene->tree;
     for (usize i = 0; i < tree->size; i++)
         tree->meta[i].visible = false;
     tree->visibleSize = 1;

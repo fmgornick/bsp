@@ -25,18 +25,12 @@ typedef struct S1 {
     /* polygon constructed by user */
     IVector2 polygon[MAX_VERTICES];
     u32 numVertices;
+    bool initialized;
 } S1;
 
 BspStage S1_Init(S1 *scene);
 BspStage S1_Render(S1 *scene);
 BspStage S1_RenderFailure(S1 *scene);
 void S1_Free(S1 *scene);
-
-// void GridInit(S1 *scene);
-// void DrawCells(S1 *scene);
-// void DrawPolygon(S1 *scene);
-// void UpdateActiveCell(S1 *scene);
-// bool IntersectingPolygon(S1 *scene);
-// void DrawMessage(char *msg, Color fg, Color bg);
 
 #endif // S1_H_

@@ -3,6 +3,7 @@
 #include "f64_vector.h"
 #include "raylib.h"
 #include "segment.h"
+#include "triangulation.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,6 +132,67 @@ FreeBspTree(BspNode *node)
     if (node->left) FreeBspTree(node->left);
     if (node->right) FreeBspTree(node->right);
     free(node);
+}
+
+void
+CopyBspTree(const BspTreeMeta *src, BspTreeMeta *dst)
+{
+    dst->height = src->height;
+    dst->size = src->size;
+    dst->meta = (BspNodeMeta *)malloc(dst->size * sizeof(BspNodeMeta));
+    for (usize i = 0; i < dst->size; i++)
+    {
+        dst->meta[i].node = (BspNode *)malloc(sizeof(BspNode));
+        dst->meta[i].node->numSegments = src->meta[i].node->numSegments;
+        dst->meta[i].node->segments = (Segment *)malloc(dst->meta[i].node->numSegments * sizeof(Segment));
+        dst->meta[i].region = (Region *)malloc(sizeof(Region));
+        dst->meta[i].region->boundarySize = src->meta[i].region->boundarySize;
+        dst->meta[i].region->triangulationSize = src->meta[i].region->triangulationSize;
+        dst->meta[i].region->boundary = (Segment *)malloc(dst->meta[i].region->boundarySize * sizeof(Segment));
+        dst->meta[i].region->triangulation = (Triangle *)malloc(dst->meta[i].region->triangulationSize * sizeof(Triangle));
+        dst->meta[i].region->line = src->meta[i].region->line;
+        dst->meta[i].region->hasLine = src->meta[i].region->hasLine;
+        dst->meta[i].region->leftIdx = src->meta[i].region->leftIdx;
+        dst->meta[i].region->rightIdx = src->meta[i].region->rightIdx;
+        for (usize j = 0; j < dst->meta[i].region->boundarySize; j++)
+            dst->meta[i].region->boundary[j] = src->meta[i].region->boundary[j];
+        for (usize j = 0; j < dst->meta[i].region->triangulationSize; j++)
+            dst->meta[i].region->triangulation[j] = src->meta[i].region->triangulation[j];
+        dst->meta[i].depth = src->meta[i].depth;
+        dst->meta[i].pos = src->meta[i].pos;
+        dst->meta[i].left = src->meta[i].left;
+        dst->meta[i].right = src->meta[i].right;
+        dst->meta[i].parent = src->meta[i].parent;
+        dst->meta[i].visible = src->meta[i].visible;
+    }
+    for (usize i = 0; i < dst->size; i++)
+    {
+        for (usize j = 0; j < dst->meta[i].node->numSegments; j++)
+            dst->meta[i].node->segments[j] = src->meta[i].node->segments[j];
+        if (dst->meta[i].left < dst->size) dst->meta[i].node->left = dst->meta[dst->meta[i].left].node;
+        else dst->meta[i].node->left = NULL;
+        if (dst->meta[i].right < dst->size) dst->meta[i].node->right = dst->meta[dst->meta[i].right].node;
+        else dst->meta[i].node->right = NULL;
+        if (dst->meta[i].parent < dst->size) dst->meta[i].node->parent = dst->meta[dst->meta[i].parent].node;
+        else dst->meta[i].node->parent = NULL;
+    }
+    dst->rootIdx = src->rootIdx;
+    dst->activeIdx = src->activeIdx;
+    dst->root = dst->meta[dst->rootIdx].node;
+    if (dst->activeIdx < dst->size)
+    {
+        dst->active = dst->meta[dst->activeIdx].node;
+        dst->activeRegion = dst->meta[dst->activeIdx].region;
+    }
+    else
+    {
+        dst->active = NULL;
+        dst->activeRegion = NULL;
+    }
+    dst->nodeRadius = src->nodeRadius;
+    dst->bounds = src->bounds;
+    dst->visibleSize = src->visibleSize;
+    dst->visibleHeight = src->visibleHeight;
 }
 
 BspTreeMeta *

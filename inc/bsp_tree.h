@@ -43,6 +43,7 @@ typedef struct BspTreeMeta {
 
 BspNode *BuildBspTree(Segment *segments, usize len, BspNode *parent);
 void FreeBspTree(BspNode *node);
+void CopyBspTree(const BspTreeMeta *src, BspTreeMeta *dst);
 
 BspTreeMeta *BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region);
 void FreeBspTreeMeta(BspTreeMeta *tree);
