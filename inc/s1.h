@@ -3,7 +3,6 @@
 
 #include "bsp.h"
 #include "i32_vector.h"
-#include "raylib.h"
 #include <stdbool.h>
 
 #define ROWS 36
@@ -33,11 +32,11 @@ BspStage S1_Render(S1 *scene);
 BspStage S1_RenderFailure(S1 *scene);
 void S1_Free(S1 *scene);
 
-void S1_GridInit(S1 *scene);
-void S1_DrawCells(S1 *scene);
-void S1_DrawPolygon(S1 *scene);
-void S1_UpdateActiveCell(S1 *scene);
-bool S1_IntersectingPolygon(S1 *scene);
-void S1_DrawMessage(char *msg, Color fg, Color bg);
+// void GridInit(S1 *scene);
+// void DrawCells(S1 *scene);
+// void DrawPolygon(S1 *scene);
+// void UpdateActiveCell(S1 *scene);
+// bool IntersectingPolygon(S1 *scene);
+// void DrawMessage(char *msg, Color fg, Color bg);
 
 #endif // S1_H_

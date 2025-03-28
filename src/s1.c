@@ -1,12 +1,22 @@
+#include "s1.h"
 #include "bsp.h"
 #include "i32_vector.h"
 #include "raylib.h"
-#include "s1.h"
+
+/* *********** helpers ********** */
+/* ****************************** */
+void GridInit(S1 *scene);
+void DrawCells(S1 *scene);
+void DrawPolygon(S1 *scene);
+void UpdateActiveCell(S1 *scene);
+bool IntersectingPolygon(S1 *scene);
+/* ****************************** */
+/* ****************************** */
 
 BspStage
 S1_Init(S1 *scene)
 {
-    S1_GridInit(scene);
+    GridInit(scene);
     return S1_PENDING;
 }
 
@@ -17,23 +27,25 @@ S1_Render(S1 *scene)
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    S1_UpdateActiveCell(scene);
-    S1_DrawCells(scene);
-    S1_DrawPolygon(scene);
+    UpdateActiveCell(scene);
+    DrawCells(scene);
+    DrawPolygon(scene);
 
     DrawText(TextFormat("remaining vertices: %d", MAX_VERTICES - scene->numVertices), 10, 10, 20, BLACK);
-    if (scene->numVertices == 0) S1_DrawMessage("select cells to create simple polygon (don't run out)", BLACK, BLUE);
+    if (scene->numVertices == 0) DrawMessage("select cells to create simple polygon (don't run out)", BLACK, BLUE);
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !S1_IntersectingPolygon(scene))
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !IntersectingPolygon(scene))
     {
         IVector2 newVertex = { scene->currentCell->j, scene->currentCell->i };
-
-        /* user tries to add last available edge => DONE if last edge closes polygon, FAILURE otherwise */
-        if (scene->numVertices == MAX_VERTICES) nextStage = (IVector2DIsEqual(newVertex, scene->polygon[0])) ? S1_COMPLETED : S1_FAILED;
-        /* user tries to add edge closing polygon => DONE (must have 3+ vertics to be a valid polygon) */
-        else if (scene->numVertices >= 3 && IVector2DIsEqual(newVertex, scene->polygon[0])) nextStage = S1_COMPLETED;
-        /* user tries to add edge and polygon still open => add edge and still PENDING */
-        else scene->polygon[scene->numVertices++] = newVertex;
+        if (scene->numVertices == 0 || !IVector2DIsEqual(newVertex, scene->polygon[scene->numVertices - 1]))
+        {
+            /* user tries to add last available edge => DONE if last edge closes polygon, FAILURE otherwise */
+            if (scene->numVertices == MAX_VERTICES) nextStage = (IVector2DIsEqual(newVertex, scene->polygon[0])) ? S1_COMPLETED : S1_FAILED;
+            /* user tries to add edge closing polygon => DONE (must have 3+ vertics to be a valid polygon) */
+            else if (scene->numVertices >= 3 && IVector2DIsEqual(newVertex, scene->polygon[0])) nextStage = S1_COMPLETED;
+            /* user tries to add edge and polygon still open => add edge and still PENDING */
+            else scene->polygon[scene->numVertices++] = newVertex;
+        }
     }
 
     EndDrawing();
@@ -46,9 +58,9 @@ S1_RenderFailure(S1 *scene)
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    S1_DrawCells(scene);
-    S1_DrawPolygon(scene);
-    S1_DrawMessage("too many vertices: press 'R' if you would like to start over", BLACK, RED);
+    DrawCells(scene);
+    DrawPolygon(scene);
+    DrawMessage("too many vertices: press 'R' if you would like to start over", BLACK, RED);
 
     if (IsKeyPressed(KEY_R))
     {
@@ -68,7 +80,7 @@ S1_Free(S1 *scene)
 }
 
 void
-S1_GridInit(S1 *scene)
+GridInit(S1 *scene)
 {
     for (usize i = 0; i < ROWS; i++)
         for (usize j = 0; j < COLS; j++)
@@ -77,7 +89,7 @@ S1_GridInit(S1 *scene)
 }
 
 void
-S1_DrawCells(S1 *scene)
+DrawCells(S1 *scene)
 {
     for (usize i = 0; i < ROWS; i++)
     {
@@ -95,7 +107,7 @@ S1_DrawCells(S1 *scene)
 }
 
 void
-S1_UpdateActiveCell(S1 *scene)
+UpdateActiveCell(S1 *scene)
 {
     Vector2 mouse = GetMousePosition();
     i32 i = mouse.y / CELL_HEIGHT;
@@ -113,7 +125,7 @@ S1_UpdateActiveCell(S1 *scene)
 }
 
 void
-S1_DrawPolygon(S1 *scene)
+DrawPolygon(S1 *scene)
 {
     if (scene->numVertices >= 2)
     {
@@ -130,13 +142,13 @@ S1_DrawPolygon(S1 *scene)
                       scene->polygon[scene->numVertices - 1].y * CELL_HEIGHT + CELL_HEIGHT / 2.0f };
         Vector2 q = { scene->currentCell->j * CELL_WIDTH + CELL_WIDTH / 2.0f, scene->currentCell->i * CELL_HEIGHT + CELL_HEIGHT / 2.0f };
 
-        if (S1_IntersectingPolygon(scene)) DrawLineEx(p, q, 2.0f, RED);
+        if (IntersectingPolygon(scene)) DrawLineEx(p, q, 2.0f, RED);
         else DrawLineEx(p, q, 2.0f, LIGHTGRAY);
     }
 }
 
 bool
-S1_IntersectingPolygon(S1 *scene)
+IntersectingPolygon(S1 *scene)
 {
     /* can't intersect if there's no line to intersect */
     if (scene->numVertices <= 1) return false;
@@ -169,16 +181,4 @@ S1_IntersectingPolygon(S1 *scene)
     }
 
     return false;
-}
-
-void
-S1_DrawMessage(char *msg, Color fg, Color bg)
-{
-    DrawRectangle(0, 3 * (HEIGHT / 4), WIDTH, HEIGHT / 4, Fade(bg, 0.5));
-
-    Vector2 textSize = MeasureTextEx(GetFontDefault(), msg, 20, 1.0f);
-    u32 xPos = (WIDTH - textSize.x) / 2;
-    u32 yPos = 3 * (HEIGHT / 4.0f) + (HEIGHT / 4.0f - textSize.y) / 2;
-
-    DrawText(msg, xPos, yPos, 20, fg);
 }

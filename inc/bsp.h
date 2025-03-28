@@ -1,6 +1,8 @@
 #ifndef BSP_H_
 #define BSP_H_
 
+#include "raylib.h"
+
 #define WIDTH 1280
 #define HEIGHT 720
 #define MAX_VERTICES 24
@@ -50,6 +52,16 @@ mod(isize i, isize n)
 {
     i32 result = (i % n + n) % n;
     return result;
+}
+
+static inline void
+DrawMessage(char *msg, Color fg, Color bg)
+{
+    DrawRectangle(0, 3 * (HEIGHT / 4), WIDTH, HEIGHT / 4, Fade(bg, 0.5));
+    Vector2 textSize = MeasureTextEx(GetFontDefault(), msg, 20, 1.0f);
+    u32 xPos = (WIDTH - textSize.x) / 2;
+    u32 yPos = 3 * (HEIGHT / 4.0f) + (HEIGHT / 4.0f - textSize.y) / 2;
+    DrawText(msg, xPos, yPos, 20, fg);
 }
 
 #endif // BSP_H_

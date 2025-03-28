@@ -6,11 +6,21 @@
 #include "segment.h"
 #include "triangulation.h"
 
+/* *********************************** helpers ********************************** */
+/* ****************************************************************************** */
+void DrawAllBspRegions(S2 *scene);
+void BspTreeStepForward(BspTreeMeta *tree);
+void BspTreeStepBack(BspTreeMeta *tree);
+void BspTreeFastForward(BspTreeMeta *tree);
+void BspTreeRewind(BspTreeMeta *tree);
+
 static usize numColors = 18;
 static Color colors[18] = {
     YELLOW,  GOLD, ORANGE,   PINK,   RED,    MAROON,     GREEN, LIME,  DARKGREEN, //
     SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, //
 };
+/* ****************************************************************************** */
+/* ****************************************************************************** */
 
 BspStage
 S2_Init(IVector2 *polygon, usize numVertices, S2 *scene)
@@ -29,6 +39,7 @@ S2_Init(IVector2 *polygon, usize numVertices, S2 *scene)
     };
     scene->segments = BuildSegments(polygon, numVertices, segmentsRegion, &scene->numSegments);
     scene->tree = BuildBspTreeMeta(scene->segments, scene->numSegments, treeRegion);
+    scene->treeBuilt = false;
     scene->drawAllRegions = false;
 
     return S2_PENDING;
@@ -37,35 +48,70 @@ S2_Init(IVector2 *polygon, usize numVertices, S2 *scene)
 BspStage
 S2_Render(S2 *scene)
 {
-    if (IsKeyPressed(KEY_LEFT)) BspTreeMetaMoveLeft(scene->tree);
-    if (IsKeyPressed(KEY_RIGHT)) BspTreeMetaMoveRight(scene->tree);
-    if (IsKeyPressed(KEY_UP)) BspTreeMetaMoveUp(scene->tree);
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    if (!scene->treeBuilt)
     {
-        Vector2 pos = GetMousePosition();
-        f32 radius = scene->tree->nodeRadius;
-        usize i = 0;
-        for (; i < scene->tree->size; i++)
-            if (CheckCollisionPointCircle(pos, scene->tree->meta[i].pos, radius)) break;
-        BspTreeMetaSetActive(scene->tree, i);
-        scene->drawAllRegions = false;
+        if (IsKeyPressed(KEY_SPACE)) scene->building ^= true;
+        if (IsKeyPressed(KEY_RIGHT))
+        {
+            scene->building = false;
+            BspTreeStepForward(scene->tree);
+        }
+        if (IsKeyPressed(KEY_LEFT))
+        {
+            scene->building = false;
+            BspTreeStepBack(scene->tree);
+        }
+        if (IsKeyPressed(KEY_C))
+        {
+            scene->building = false;
+            BspTreeFastForward(scene->tree);
+        }
+        if (IsKeyPressed(KEY_R))
+        {
+            scene->building = false;
+            BspTreeRewind(scene->tree);
+        }
+        if (scene->building)
+        {
+            scene->buildTreeDt += GetFrameTime();
+            if (scene->buildTreeDt >= 0.3f)
+            {
+                scene->buildTreeDt = 0.0f;
+                BspTreeStepForward(scene->tree);
+            }
+        }
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            BspTreeFastForward(scene->tree);
+            scene->building = false;
+            scene->treeBuilt = true;
+            scene->drawAllRegions = true;
+        }
     }
-    if (IsKeyPressed(KEY_F)) scene->drawAllRegions = true ^ scene->drawAllRegions;
+    else
+    {
+        if (IsKeyPressed(KEY_LEFT)) BspTreeMetaMoveLeft(scene->tree);
+        if (IsKeyPressed(KEY_RIGHT)) BspTreeMetaMoveRight(scene->tree);
+        if (IsKeyPressed(KEY_UP)) BspTreeMetaMoveUp(scene->tree);
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            Vector2 pos = GetMousePosition();
+            f32 radius = scene->tree->nodeRadius;
+            usize i = 0;
+            for (; i < scene->tree->size; i++)
+                if (CheckCollisionPointCircle(pos, scene->tree->meta[i].pos, radius)) break;
+            BspTreeMetaSetActive(scene->tree, i);
+            scene->drawAllRegions = false;
+        }
+        if (IsKeyPressed(KEY_F)) scene->drawAllRegions ^= true;
+    }
 
     BeginDrawing();
     ClearBackground(WHITE);
     DrawSegments(scene->segments, scene->numSegments);
     DrawBspTreeMeta(scene->tree);
-    if (scene->drawAllRegions) S2_DrawAllBspRegions(scene);
+    if (scene->drawAllRegions) DrawAllBspRegions(scene);
     else DrawRegion(scene->tree->activeRegion);
-
-    /* { */
-    /*     Vector2 v1 = { .x = 640.0f, .y = 100.0f }; */
-    /*     Vector2 v2 = { .x = 320.0f, .y = 600.0f }; */
-    /*     Vector2 v3 = { .x = 960.0f, .y = 600.0f }; */
-    /*     DrawTriangle(v1, v2, v3, Fade(BLUE, 0.5f)); */
-    /* } */
-
     EndDrawing();
 
     return S2_PENDING;
@@ -85,7 +131,7 @@ S2_Free(S2 *scene)
 }
 
 void
-S2_DrawAllBspRegions(S2 *scene)
+DrawAllBspRegions(S2 *scene)
 {
     BspTreeMetaSetActive(scene->tree, scene->tree->size);
     for (usize i = 0; i < scene->tree->size; i++)
@@ -105,11 +151,73 @@ S2_DrawAllBspRegions(S2 *scene)
 }
 
 void
-S2_DrawMessage(char *msg, Color fg, Color bg)
+BspTreeStepForward(BspTreeMeta *tree)
 {
-    DrawRectangle(0, 3 * (HEIGHT / 4), WIDTH, HEIGHT / 4, Fade(bg, 0.5));
-    Vector2 textSize = MeasureTextEx(GetFontDefault(), msg, 20, 1.0f);
-    u32 xPos = (WIDTH - textSize.x) / 2;
-    u32 yPos = 3 * (HEIGHT / 4.0f) + (HEIGHT / 4.0f - textSize.y) / 2;
-    DrawText(msg, xPos, yPos, 20, fg);
+    if (tree->activeIdx == tree->size - 1) return;
+    if (tree->active->left && !tree->meta[idxLeft(tree, tree->activeIdx)].visible)
+    {
+        BspTreeMetaMoveLeft(tree);
+        tree->meta[tree->activeIdx].visible = true;
+        tree->visibleSize += 1;
+        tree->visibleHeight = max(tree->meta[tree->activeIdx].depth + 1, tree->visibleHeight);
+        UpdateBspTreeMeta(tree);
+    }
+    else if (tree->active->right && !tree->meta[idxRight(tree, tree->activeIdx)].visible)
+    {
+        BspTreeMetaMoveRight(tree);
+        tree->meta[tree->activeIdx].visible = true;
+        tree->visibleSize += 1;
+        tree->visibleHeight = max(tree->meta[tree->activeIdx].depth + 1, tree->visibleHeight);
+        UpdateBspTreeMeta(tree);
+    }
+    else if (tree->active->parent) BspTreeMetaMoveUp(tree);
+}
+
+void
+BspTreeStepBack(BspTreeMeta *tree)
+{
+    if (tree->active == tree->root) return;
+    if (tree->active->right && tree->meta[idxRight(tree, tree->activeIdx)].visible) BspTreeMetaMoveRight(tree);
+    else if (tree->active->right && tree->meta[idxLeft(tree, tree->activeIdx)].visible) BspTreeMetaMoveLeft(tree);
+    else
+    {
+        tree->meta[tree->activeIdx].visible = false;
+        tree->visibleSize -= 1;
+        bool blah = true;
+        for (usize i = 0; i < tree->size; i++)
+        {
+            if (i == tree->activeIdx) continue;
+            if (tree->meta[i].visible && tree->meta[i].depth >= tree->meta[tree->activeIdx].depth)
+            {
+                blah = false;
+                break;
+            }
+        }
+        if (blah) tree->visibleHeight -= 1;
+        BspTreeMetaMoveUp(tree);
+        UpdateBspTreeMeta(tree);
+    }
+}
+
+void
+BspTreeFastForward(BspTreeMeta *tree)
+{
+    for (usize i = 0; i < tree->size; i++)
+        tree->meta[i].visible = true;
+    tree->visibleSize = tree->size;
+    tree->visibleHeight = tree->height;
+    BspTreeMetaSetActive(tree, tree->size - 1);
+    UpdateBspTreeMeta(tree);
+}
+
+void
+BspTreeRewind(BspTreeMeta *tree)
+{
+    for (usize i = 0; i < tree->size; i++)
+        tree->meta[i].visible = false;
+    tree->visibleSize = 1;
+    tree->visibleHeight = 1;
+    tree->meta[tree->rootIdx].visible = true;
+    BspTreeMetaSetActive(tree, tree->rootIdx);
+    UpdateBspTreeMeta(tree);
 }

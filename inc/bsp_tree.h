@@ -37,7 +37,7 @@ typedef struct BspTreeMeta {
     Region *activeRegion; /* current active region in BSP tree */
     f32 nodeRadius;       /* radius of BSP node for displaying (dependent on tree/region size) */
     BoundingRegion bounds;
-    usize numVisible;
+    usize visibleSize;
     usize visibleHeight;
 } BspTreeMeta;
 
