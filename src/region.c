@@ -1,8 +1,8 @@
 #include "region.h"
 #include "bsp.h"
+#include "f64_segment.h"
 #include "f64_vector.h"
 #include "raylib.h"
-#include "segment.h"
 #include "triangulation.h"
 #include <assert.h>
 #include <stdbool.h>
@@ -13,7 +13,7 @@ void flipSplit(Region *region);
 /* ***************************** */
 
 Region *
-BuildRegion(usize width, usize height, Segment initialLine)
+BuildRegion(usize width, usize height, DSegment initialLine)
 {
     Region *region = (Region *)malloc(sizeof(Region));
 
@@ -21,20 +21,20 @@ BuildRegion(usize width, usize height, Segment initialLine)
        * create counter-clockwise boundary around provided region
        */
         region->boundarySize = 4;
-        region->boundary = (Segment *)malloc(region->boundarySize * sizeof(Segment));
-        region->boundary[0] = (Segment){
+        region->boundary = (DSegment *)malloc(region->boundarySize * sizeof(DSegment));
+        region->boundary[0] = (DSegment){
             .left = (DVector2){ 0, 0 },
             .right = (DVector2){ 0, height },
         };
-        region->boundary[1] = (Segment){
+        region->boundary[1] = (DSegment){
             .left = (DVector2){ 0, height },
             .right = (DVector2){ width, height },
         };
-        region->boundary[2] = (Segment){
+        region->boundary[2] = (DSegment){
             .left = (DVector2){ width, height },
             .right = (DVector2){ width, 0 },
         };
-        region->boundary[3] = (Segment){
+        region->boundary[3] = (DSegment){
             .left = (DVector2){ width, 0 },
             .right = (DVector2){ 0, 0 },
         };
@@ -49,9 +49,9 @@ BuildRegion(usize width, usize height, Segment initialLine)
         usize numIntersections = 0;
         for (usize i = 0; i < region->boundarySize; i++)
         {
-            if (SegmentsParallel(initialLine, region->boundary[i])) continue;
-            DVector2 intersection = SegmentIntersection(initialLine, region->boundary[i]);
-            if (SegmentContainsPoint(region->boundary[i], intersection))
+            if (DSegmentsParallel(initialLine, region->boundary[i])) continue;
+            DVector2 intersection = DSegmentIntersection(initialLine, region->boundary[i]);
+            if (DSegmentContainsPoint(region->boundary[i], intersection))
             {
                 intersections[numIntersections] = intersection;
                 indexes[numIntersections] = i;
@@ -64,7 +64,7 @@ BuildRegion(usize width, usize height, Segment initialLine)
         region->line.right = intersections[1];
         region->rightIdx = indexes[1];
         /* split line and node segment(s) go in opposing directions => flip split line */
-        if (SegmentsDotProduct(initialLine, region->line) < 0) flipSplit(region);
+        if (DSegmentsDotProduct(initialLine, region->line) < 0) flipSplit(region);
     }
 
     { /* triangulate region */
@@ -76,11 +76,11 @@ BuildRegion(usize width, usize height, Segment initialLine)
 }
 
 Region *
-NewRegion(Region *oldRegion, Segment *segments, usize numSegments, SplitDirection dir)
+NewRegion(Region *oldRegion, DSegment *segments, usize numSegments, SplitDirection dir)
 {
     Region *newRegion = (Region *)malloc(sizeof(Region));
 
-    Segment line;
+    DSegment line;
     usize leftIdx, rightIdx;
     { /*
        * new active segment is on the right => flip active segment orientation
@@ -88,7 +88,7 @@ NewRegion(Region *oldRegion, Segment *segments, usize numSegments, SplitDirectio
        */
         if (dir == SplitRight)
         {
-            line = (Segment){
+            line = (DSegment){
                 .left = oldRegion->line.right,
                 .right = oldRegion->line.left,
             };
@@ -111,13 +111,13 @@ NewRegion(Region *oldRegion, Segment *segments, usize numSegments, SplitDirectio
        *   - all remaining boundary points on "dir" side of segment are added between the split segemtns
        */
         newRegion->boundarySize = oldRegion->boundarySize - mod(rightIdx - leftIdx, oldRegion->boundarySize) + 2;
-        newRegion->boundary = (Segment *)malloc(newRegion->boundarySize * sizeof(Segment));
+        newRegion->boundary = (DSegment *)malloc(newRegion->boundarySize * sizeof(DSegment));
         newRegion->boundary[0] = line;
-        newRegion->boundary[1] = (Segment){
+        newRegion->boundary[1] = (DSegment){
             .left = line.right,
             .right = oldRegion->boundary[rightIdx].right,
         };
-        newRegion->boundary[newRegion->boundarySize - 1] = (Segment){
+        newRegion->boundary[newRegion->boundarySize - 1] = (DSegment){
             .left = oldRegion->boundary[leftIdx].left,
             .right = line.left,
         };
@@ -142,9 +142,9 @@ NewRegion(Region *oldRegion, Segment *segments, usize numSegments, SplitDirectio
         bool intersectedOnce = false;
         for (usize i = 0; i < newRegion->boundarySize; i++)
         {
-            if (SegmentsParallel(segments[0], newRegion->boundary[i])) continue;
-            DVector2 intersection = SegmentIntersection(segments[0], newRegion->boundary[i]);
-            if (SegmentContainsPoint(newRegion->boundary[i], intersection))
+            if (DSegmentsParallel(segments[0], newRegion->boundary[i])) continue;
+            DVector2 intersection = DSegmentIntersection(segments[0], newRegion->boundary[i]);
+            if (DSegmentContainsPoint(newRegion->boundary[i], intersection))
             {
                 if (!intersectedOnce)
                 {
@@ -161,7 +161,7 @@ NewRegion(Region *oldRegion, Segment *segments, usize numSegments, SplitDirectio
             }
         }
         /* split line and node segment(s) go in opposing directions => flip split line */
-        if (SegmentsDotProduct(segments[0], newRegion->line) < 0) flipSplit(newRegion);
+        if (DSegmentsDotProduct(segments[0], newRegion->line) < 0) flipSplit(newRegion);
     }
 
     { /* triangulate region */

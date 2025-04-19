@@ -74,7 +74,7 @@ ResizeDCEL(DCEL *dcel, usize numVertices, usize numFaces, usize numHalfEdges)
 }
 
 DCEL *
-BuildSimpleDCEL(Segment *segments, usize numSegments)
+BuildSimpleDCEL(DSegment *segments, usize numSegments)
 {
     assert(numSegments >= 1);
     DCEL *dcel = NewDCEL(numSegments, 2, numSegments * 2);

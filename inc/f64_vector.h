@@ -24,4 +24,9 @@ f64 DVector2Determinant(DVector2 v1, DVector2 v2);
 bool DVector2DIsEqual(DVector2 v1, DVector2 v2);
 DVector2 DVector2Negate(DVector2 v);
 
+f64 DVector2Length(DVector2 v);
+f64 DVector2LineAngle(DVector2 start, DVector2 end);
+DVector2 DVector2Normalize(DVector2 v);
+DVector2 DVector2Rotate(DVector2 v, f64 angle);
+
 #endif // F64_VECTOR_H_

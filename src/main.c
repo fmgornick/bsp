@@ -50,7 +50,7 @@ main(isize argc, char *argv[])
             break;
 
         case S3_INITIALIZING:
-            stage = S3_Init(s2.tree, &s3);
+            stage = S3_Init(s2.segments, s2.numSegments, s2.tree, &s3);
             S2_Free(&s2);
             break;
 

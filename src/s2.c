@@ -1,26 +1,20 @@
 #include "s2.h"
 #include "bsp.h"
 #include "bsp_tree.h"
+#include "f64_segment.h"
 #include "raylib.h"
 #include "region.h"
-#include "segment.h"
 #include "triangulation.h"
 
-/* *********************************** helpers ********************************** */
-/* ****************************************************************************** */
+/* ********** helpers ********** */
+/* ***************************** */
 void DrawAllBspRegions(S2 *scene);
 void BspTreeStepForward(S2 *scene);
 void BspTreeStepBack(S2 *scene);
 void BspTreeFastForward(S2 *scene);
 void BspTreeRewind(S2 *scene);
-
-static usize numColors = 18;
-static Color colors[18] = {
-    YELLOW,  GOLD, ORANGE,   PINK,   RED,    MAROON,     GREEN, LIME,  DARKGREEN, //
-    SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, //
-};
-/* ****************************************************************************** */
-/* ****************************************************************************** */
+/* ***************************** */
+/* ***************************** */
 
 BspStage
 S2_Init(IVector2 *polygon, usize numVertices, S2 *scene)

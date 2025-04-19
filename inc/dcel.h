@@ -2,8 +2,8 @@
 #define DCEL_H_
 
 #include "bsp.h"
+#include "f64_segment.h"
 #include "f64_vector.h"
-#include "segment.h"
 
 typedef struct VertexEntry VertexEntry;
 typedef struct FaceEntry FaceEntry;
@@ -57,7 +57,7 @@ typedef struct DCEL {
 } DCEL;
 
 DCEL *NewDCEL(usize numVertices, usize numFaces, usize numEdges);
-DCEL *BuildSimpleDCEL(Segment *segments, usize numSegments);
+DCEL *BuildSimpleDCEL(DSegment *segments, usize numSegments);
 void FreeDCEL(DCEL *dcel);
 
 void ResizeDCEL(DCEL *dcel, usize numVertices, usize numFaces, usize numHalfEdges);

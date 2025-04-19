@@ -2,6 +2,7 @@
 #define TRIANGULATION_H_
 
 #include "dcel.h"
+#include "raylib.h"
 
 typedef struct Triangle {
     Vector2 v1;
@@ -9,7 +10,8 @@ typedef struct Triangle {
     Vector2 v3;
 } Triangle;
 
-Triangle *MonotoneTriangulation(Segment *segments, usize numSegments);
+Triangle *MonotoneTriangulation(DSegment *segments, usize numSegments);
 void MonotoneTriangulateDCEL(DCEL *polygon);
+Vector2 TriangleCenter(Triangle t);
 
 #endif // TRIANGULATION_H_

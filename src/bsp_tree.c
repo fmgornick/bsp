@@ -1,8 +1,8 @@
 #include "bsp_tree.h"
 #include "bsp.h"
+#include "f64_segment.h"
 #include "f64_vector.h"
 #include "raylib.h"
-#include "segment.h"
 #include "triangulation.h"
 #include <assert.h>
 #include <stdio.h>
@@ -10,7 +10,7 @@
 #include <string.h>
 
 BspNode *
-BuildBspTree(Segment *segments, usize len, BspNode *parent)
+BuildBspTree(DSegment *segments, usize len, BspNode *parent)
 {
     BspNode *node = (BspNode *)malloc(sizeof(BspNode));
     node->left = NULL;
@@ -37,18 +37,18 @@ BuildBspTree(Segment *segments, usize len, BspNode *parent)
         usize numBehind = 0, numInFront = 0, numInside = 0;
         for (usize i = 0; i < len; i++)
         {
-            switch (SegmentSides(segments[splitIdx], segments[i]))
+            switch (DSegmentSides(segments[splitIdx], segments[i]))
             {
-            case SideInside:
+            case DSideInside:
                 numInside += 1;
                 break;
-            case SideLeft:
+            case DSideLeft:
                 numInFront += 1;
                 break;
-            case SideRight:
+            case DSideRight:
                 numBehind += 1;
                 break;
-            case SideBoth:
+            case DSideBoth:
                 numInFront += 1;
                 numBehind += 1;
                 break;
@@ -56,31 +56,31 @@ BuildBspTree(Segment *segments, usize len, BspNode *parent)
         }
 
         assert(numInside >= 1);
-        node->segments = (Segment *)malloc(numInside * sizeof(Segment));
+        node->segments = (DSegment *)malloc(numInside * sizeof(DSegment));
         node->numSegments = numInside;
 
-        Segment *segmentsBehind = NULL;
-        Segment *segmentsInFront = NULL;
-        if (numBehind > 0) segmentsBehind = (Segment *)malloc(numBehind * sizeof(Segment));
-        if (numInFront > 0) segmentsInFront = (Segment *)malloc(numInFront * sizeof(Segment));
+        DSegment *segmentsBehind = NULL;
+        DSegment *segmentsInFront = NULL;
+        if (numBehind > 0) segmentsBehind = (DSegment *)malloc(numBehind * sizeof(DSegment));
+        if (numInFront > 0) segmentsInFront = (DSegment *)malloc(numInFront * sizeof(DSegment));
         usize behindIdx = 0, inFrontIdx = 0, insideIdx = 0;
         /* second pass - add segments to middle node and recurse into left/right children */
         for (usize i = 0; i < len; i++)
         {
-            switch (SegmentSides(segments[splitIdx], segments[i]))
+            switch (DSegmentSides(segments[splitIdx], segments[i]))
             {
             /* both endpoints inside split segment => add si to current node segment list */
-            case SideInside:
+            case DSideInside:
                 node->segments[insideIdx++] = segments[i];
                 break;
 
             /* both endpoints in front of split segment => add si to right segment list */
-            case SideLeft:
+            case DSideLeft:
                 segmentsInFront[inFrontIdx++] = segments[i];
                 break;
 
             /* both endpoints behind split segment => add si to left segment list */
-            case SideRight:
+            case DSideRight:
                 segmentsBehind[behindIdx++] = segments[i];
                 break;
 
@@ -90,12 +90,12 @@ BuildBspTree(Segment *segments, usize len, BspNode *parent)
              *  - insert split subsegments into respective left/right segment lists
              *  - update bools for each subsegment for "free split" check in recursive call
              */
-            case SideBoth: {
+            case DSideBoth: {
                 segmentsBehind[behindIdx] = segments[i];
                 segmentsInFront[inFrontIdx] = segments[i];
-                DVector2 intersection = SegmentIntersection(segments[splitIdx], segments[i]);
+                DVector2 intersection = DSegmentIntersection(segments[splitIdx], segments[i]);
 
-                if (SegmentSide(segments[splitIdx], segments[i].left) == SideRight)
+                if (DSegmentSide(segments[splitIdx], segments[i].left) == DSideRight)
                 {
                     segmentsBehind[behindIdx].splitRight = true;
                     segmentsInFront[inFrontIdx].splitLeft = true;
@@ -144,11 +144,11 @@ CopyBspTree(const BspTreeMeta *src, BspTreeMeta *dst)
     {
         dst->meta[i].node = (BspNode *)malloc(sizeof(BspNode));
         dst->meta[i].node->numSegments = src->meta[i].node->numSegments;
-        dst->meta[i].node->segments = (Segment *)malloc(dst->meta[i].node->numSegments * sizeof(Segment));
+        dst->meta[i].node->segments = (DSegment *)malloc(dst->meta[i].node->numSegments * sizeof(DSegment));
         dst->meta[i].region = (Region *)malloc(sizeof(Region));
         dst->meta[i].region->boundarySize = src->meta[i].region->boundarySize;
         dst->meta[i].region->triangulationSize = src->meta[i].region->triangulationSize;
-        dst->meta[i].region->boundary = (Segment *)malloc(dst->meta[i].region->boundarySize * sizeof(Segment));
+        dst->meta[i].region->boundary = (DSegment *)malloc(dst->meta[i].region->boundarySize * sizeof(DSegment));
         dst->meta[i].region->triangulation = (Triangle *)malloc(dst->meta[i].region->triangulationSize * sizeof(Triangle));
         dst->meta[i].region->line = src->meta[i].region->line;
         dst->meta[i].region->hasLine = src->meta[i].region->hasLine;
@@ -196,14 +196,14 @@ CopyBspTree(const BspTreeMeta *src, BspTreeMeta *dst)
 }
 
 BspTreeMeta *
-BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region)
+BuildBspTreeMeta(DSegment *segments, usize len, BoundingRegion region)
 {
     BspTreeMeta *tree = (BspTreeMeta *)malloc(sizeof(BspTreeMeta));
     tree->bounds = region;
 
     { /* create actual bsp tree */
-        Segment *segmentsCopy = (Segment *)malloc(len * sizeof(Segment));
-        memcpy(segmentsCopy, segments, len * sizeof(Segment));
+        DSegment *segmentsCopy = (DSegment *)malloc(len * sizeof(DSegment));
+        memcpy(segmentsCopy, segments, len * sizeof(DSegment));
         tree->root = BuildBspTree(segmentsCopy, len, NULL);
     }
 
@@ -444,6 +444,18 @@ bool
 IsLeaf(BspNode *node)
 {
     return (!node->left) && (!node->right);
+}
+
+bool
+IsLeftChild(BspNode *node)
+{
+    return (node->parent) && (node == node->parent->left);
+}
+
+bool
+IsRightChild(BspNode *node)
+{
+    return (node->parent) && (node == node->parent->right);
 }
 
 BspNode *

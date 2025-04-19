@@ -7,9 +7,9 @@
 #include <stdbool.h>
 
 typedef struct S2 {
-    Segment *segments; /* line segments of polygon from S1 */
-    usize numSegments; /* number of line segments in polygon from S1 */
-    BspTreeMeta *tree; /* BSP tree with metadata for visual display */
+    DSegment *segments; /* line segments of polygon from S1 */
+    usize numSegments;  /* number of line segments in polygon from S1 */
+    BspTreeMeta *tree;  /* BSP tree with metadata for visual display */
 
     bool building;       /* (pt 1) true if automated tree build running */
     f32 buildTreeDt;     /* (pt 1) time from last frame (for automated building) */

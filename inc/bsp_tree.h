@@ -2,16 +2,16 @@
 #define BSP_TREE_H_
 
 #include "bsp.h"
+#include "f64_segment.h"
 #include "raylib.h"
 #include "region.h"
-#include "segment.h"
 #include <stdbool.h>
 
 typedef struct BspNode {
     struct BspNode *left;   /* pointer to left child (if exists) */
     struct BspNode *right;  /* pointer to right child (if exists) */
     struct BspNode *parent; /* pointer to parent (if exists) */
-    Segment *segments;      /* segment(s) corresponding to BSP node */
+    DSegment *segments;     /* segment(s) corresponding to BSP node */
     usize numSegments;      /* number of segments for node (usually 1) */
 } BspNode;
 
@@ -41,11 +41,11 @@ typedef struct BspTreeMeta {
     usize visibleHeight;
 } BspTreeMeta;
 
-BspNode *BuildBspTree(Segment *segments, usize len, BspNode *parent);
+BspNode *BuildBspTree(DSegment *segments, usize len, BspNode *parent);
 void FreeBspTree(BspNode *node);
 void CopyBspTree(const BspTreeMeta *src, BspTreeMeta *dst);
 
-BspTreeMeta *BuildBspTreeMeta(Segment *segments, usize len, BoundingRegion region);
+BspTreeMeta *BuildBspTreeMeta(DSegment *segments, usize len, BoundingRegion region);
 void FreeBspTreeMeta(BspTreeMeta *tree);
 void BuildTreeRegions(BspTreeMeta *tree, usize idx);
 void DrawBspTreeMeta(BspTreeMeta *tree);
@@ -61,6 +61,8 @@ BspNode *MaxNode(BspNode *root);
 BspNode *PrevNode(BspNode *node);
 BspNode *SuccNode(BspNode *node);
 bool IsLeaf(BspNode *node);
+bool IsLeftChild(BspNode *node);
+bool IsRightChild(BspNode *node);
 
 BspNode *bspNode(BspTreeMeta *tree, usize idx);
 usize idxLeft(BspTreeMeta *tree, usize idx);

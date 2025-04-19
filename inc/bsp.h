@@ -2,6 +2,7 @@
 #define BSP_H_
 
 #include "raylib.h"
+#include <stdlib.h>
 
 #define WIDTH 1280
 #define HEIGHT 720
@@ -22,6 +23,12 @@ typedef unsigned long long int u64;
 typedef unsigned int usize;
 typedef float f32;
 typedef double f64;
+
+static usize numColors = 18;
+static Color colors[18] = {
+    YELLOW,  GOLD, ORANGE,   PINK,   RED,    MAROON,     GREEN, LIME,  DARKGREEN, //
+    SKYBLUE, BLUE, DARKBLUE, PURPLE, VIOLET, DARKPURPLE, BEIGE, BROWN, DARKBROWN, //
+};
 
 typedef enum BspStage {
     S1_INITIALIZING,
@@ -54,6 +61,12 @@ mod(isize i, isize n)
     return result;
 }
 
+static inline f32
+rand_f32(f32 min, f32 max)
+{
+    return min + (f32)rand() / RAND_MAX * (max - min);
+}
+
 static inline void
 DrawMessage(char *msg, Color fg, Color bg)
 {
@@ -62,6 +75,13 @@ DrawMessage(char *msg, Color fg, Color bg)
     u32 xPos = (WIDTH - textSize.x) / 2;
     u32 yPos = 3 * (HEIGHT / 4.0f) + (HEIGHT / 4.0f - textSize.y) / 2;
     DrawText(msg, xPos, yPos, 20, fg);
+}
+
+static inline f32
+Vector2Determinant(Vector2 v1, Vector2 v2)
+{
+    f32 result = (v1.x * v2.y - v1.y * v2.x);
+    return result;
 }
 
 #endif // BSP_H_

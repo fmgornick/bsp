@@ -2,7 +2,7 @@
 #include "bsp.h"
 #include "dcel.h"
 #include "f64_vector.h"
-#include "raymath.h"
+#include "raylib.h"
 #include <assert.h>
 #include <stdlib.h>
 
@@ -11,7 +11,7 @@ i32 vtxcmp(const VertexEntry u, const VertexEntry v);
 /* *********************************************** */
 
 Triangle *
-MonotoneTriangulation(Segment *segments, usize numSegments)
+MonotoneTriangulation(DSegment *segments, usize numSegments)
 {
     DCEL *dcel = BuildSimpleDCEL(segments, numSegments);
     MonotoneTriangulateDCEL(dcel);
@@ -145,6 +145,15 @@ MonotoneTriangulateDCEL(DCEL *dcel)
         free(stack);
         free(chainSide);
     }
+}
+
+Vector2
+TriangleCenter(Triangle t)
+{
+    return (Vector2){
+        .x = (t.v1.x + t.v2.x + t.v3.x) / 3.0f,
+        .y = (t.v1.y + t.v2.y + t.v3.y) / 3.0f,
+    };
 }
 
 i32
