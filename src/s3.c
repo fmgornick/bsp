@@ -79,6 +79,9 @@ S3_Init(const DSegment *segments, usize numSegments, BspTreeMeta *tree, S3 *scen
             Vector2 initialDir = { 0.0f, -1.0f };
             f32 hfov = PI / 4.0f;
             scene->player = PlayerInit(randomCentroid, initialDir, hfov);
+            for (usize i = 0; i < numInnerRegions; i++)
+                FreeRegion(innerRegions[i]);
+            free(innerRegions);
         }
     }
 
@@ -90,12 +93,19 @@ S3_Init(const DSegment *segments, usize numSegments, BspTreeMeta *tree, S3 *scen
 BspStage
 S3_Render(S3 *scene)
 {
-    if (IsKeyDown(KEY_W)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, 0.01f));
-    if (IsKeyDown(KEY_A)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, 0.01f));
-    if (IsKeyDown(KEY_S)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, -0.01f));
-    if (IsKeyDown(KEY_D)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, -0.01f));
-    if (IsKeyDown(KEY_LEFT)) PlayerRotate(&scene->player, 0.001f);
-    if (IsKeyDown(KEY_RIGHT)) PlayerRotate(&scene->player, -0.001f);
+#ifdef WASM
+    f32 movementMultiplier = 100.0f;
+    f32 rotationMultiplier = 50.0f;
+#else
+    f32 movementMultiplier = 1.0f;
+    f32 rotationMultiplier = 0.5f;
+#endif
+    if (IsKeyDown(KEY_W)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, 0.01f * movementMultiplier));
+    if (IsKeyDown(KEY_A)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, 0.01f * movementMultiplier));
+    if (IsKeyDown(KEY_S)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, -0.01f * movementMultiplier));
+    if (IsKeyDown(KEY_D)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, -0.01f * movementMultiplier));
+    if (IsKeyDown(KEY_LEFT)) PlayerRotate(&scene->player, 0.001f * rotationMultiplier);
+    if (IsKeyDown(KEY_RIGHT)) PlayerRotate(&scene->player, -0.001f * rotationMultiplier);
 
     BeginDrawing();
     ClearBackground(RAYWHITE);

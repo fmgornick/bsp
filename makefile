@@ -29,7 +29,7 @@ obj/%.o: src/%.c
 
 obj/web_%.o: src/%.c
 	@mkdir -p obj
-	emcc -c $(FLAGS) $< -o $@
+	emcc -DWASM -c $(FLAGS) $< -o $@
 
 # memory check
 check: bsp
