@@ -2,6 +2,7 @@
 #define F32_SEGMENT_H_
 
 #include "bsp.h"
+#include "f64_segment.h"
 #include <stdbool.h>
 
 typedef struct FSegment {
@@ -16,6 +17,7 @@ typedef enum Side {
     FSideBoth,
 } Side;
 
+FSegment *BuildFSegments(const DSegment *dSegments, usize numSegments, BoundingRegion region, usize *size);
 f32 FSegmentsDotProduct(FSegment s1, FSegment s2);
 f32 FSegmentPointDeterminant(FSegment s, Vector2 pt);
 Side FSegmentSide(FSegment s, Vector2 pt);

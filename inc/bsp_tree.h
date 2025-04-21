@@ -12,6 +12,7 @@ typedef struct BspNode {
     struct BspNode *right;  /* pointer to right child (if exists) */
     struct BspNode *parent; /* pointer to parent (if exists) */
     DSegment *segments;     /* segment(s) corresponding to BSP node */
+    Color color;            /* color of segment(s) (only used for stage 3) */
     usize numSegments;      /* number of segments for node (usually 1) */
 } BspNode;
 

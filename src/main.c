@@ -8,7 +8,7 @@
 isize
 main(isize argc, char *argv[])
 {
-    BspStage stage = S2_INITIALIZING;
+    BspStage stage = S3_INITIALIZING;
     S1 s1 = { 0 };
     S2 s2 = { 0 };
     S3 s3 = { 0 };
@@ -50,8 +50,7 @@ main(isize argc, char *argv[])
             break;
 
         case S3_INITIALIZING:
-            stage = S3_Init(s2.segments, s2.numSegments, s2.tree, &s3);
-            S2_Free(&s2);
+            stage = S3_Init(complexPolygon, complexNumVertices, &s3);
             break;
 
         case S3_PENDING:

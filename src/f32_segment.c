@@ -3,6 +3,44 @@
 #include "raymath.h"
 #include <assert.h>
 
+FSegment *
+BuildFSegments(const DSegment *dSegments, usize numSegments, BoundingRegion region, usize *size)
+{
+    u32 width = region.right - region.left;
+    u32 height = region.bottom - region.top;
+    FSegment *segments = (FSegment *)malloc(numSegments * sizeof(FSegment));
+
+    /* we want to resize the polygon from stage one to fit our stage 2 split screen */
+    f32 xMin = MAXFLOAT, yMin = MAXFLOAT, xMax = 0, yMax = 0;
+    for (usize i = 0; i < numSegments; i++)
+    {
+        if (dSegments[i].left.x < xMin) xMin = dSegments[i].left.x;
+        if (dSegments[i].left.x > xMax) xMax = dSegments[i].left.x;
+        if (dSegments[i].left.y < yMin) yMin = dSegments[i].left.y;
+        if (dSegments[i].left.y > yMax) yMax = dSegments[i].left.y;
+    }
+
+    f64 scale = min((f64)width / (xMax - xMin), (f64)height / (yMax - yMin));
+    f64 xPadding = (width - (xMax + xMin) * scale) / 2.0f + region.left;
+    f64 yPadding = (height - (yMax + yMin) * scale) / 2.0f + region.top;
+
+    for (usize i = 0; i < numSegments; i++)
+    {
+        segments[i] = (FSegment){
+            .origin = (Vector2) {
+                .x = scale * dSegments[i].left.x + xPadding,
+                .y = scale * dSegments[i].left.y + yPadding,
+            },
+            .dest = (Vector2){
+                .x = scale * dSegments[i].right.x + xPadding,
+                .y = scale * dSegments[i].right.y + yPadding,
+            },
+        };
+    }
+    *size = numSegments;
+    return segments;
+}
+
 f32
 FSegmentsDotProduct(FSegment u, FSegment v)
 {

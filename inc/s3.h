@@ -18,13 +18,15 @@ typedef struct Player {
 
 typedef struct S3 {
     Player player;
-    FSegment *segments;
     usize numSegments;
-    BspTreeMeta *tree;
+    Color *colors;
+    FSegment *minimap;
+    BoundingRegion minimapRegion;
+    BspNode *tree;
     bool initialized;
 } S3;
 
-BspStage S3_Init(const DSegment *segments, usize numSegments, BspTreeMeta *tree, S3 *scene);
+BspStage S3_Init(IVector2 *polygon, usize numVertices, S3 *scene);
 BspStage S3_Render(S3 *scene);
 BspStage S3_RenderFailure(S3 *scene);
 void S3_Free(S3 *scene);
