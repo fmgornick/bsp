@@ -32,6 +32,12 @@ BspStage S3_Render(S3 *scene);
 BspStage S3_RenderFailure(S3 *scene);
 void S3_Free(S3 *scene);
 
+Player PlayerInit(Vector2 pos, Vector2 dir, f32 hfov);
+void PlayerUpdate(Player *p);
+void PlayerMove(Player *p, Vector2 dir);
+void PlayerRotate(Player *p, f32 angle);
+void PlayerUpdateFov(Player *p, f32 dt);
+
 // void DrawScene(S3 *scene);
 void DrawMinimap(S3 *scene);
 

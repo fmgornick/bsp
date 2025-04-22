@@ -9,18 +9,15 @@
 #include <stdio.h>
 #include <string.h>
 
-/* *********************** helpers *********************** */
-/* ******************************************************* */
-Player PlayerInit(Vector2 pos, Vector2 dir, f32 hfov);
-void PlayerMove(Player *p, Vector2 dir);
-void PlayerRotate(Player *p, f32 angle);
-void PlayerUpdate(Player *p);
+/* ************************** helpers ************************** */
+/* ************************************************************* */
 void DrawWall(Player p, FSegment s, f32 height, Color color);
 void DrawNode(BspNode *node, Player p);
 void DrawScene(BspNode *node, Player p);
 Vector2 TranslatePoint(Vector2 pt, BoundingRegion region);
-/* ******************************************************* */
-/* ******************************************************* */
+FSegment TranslateSegment(FSegment segment, BoundingRegion region);
+/* ************************************************************* */
+/* ************************************************************* */
 
 BspStage
 S3_Init(IVector2 *polygon, usize numVertices, S3 *scene)
@@ -56,57 +53,6 @@ S3_Init(IVector2 *polygon, usize numVertices, S3 *scene)
             }
         }
     }
-    // {
-    //     usize numInnerRegions = 0;
-    //     { /* calculate number of inner regions */
-    //         for (usize i = 0; i < tree->size; i++)
-    //         {
-    //             BspNode *node = tree->meta[i].node;
-    //             if (IsLeaf(node) && ((node->numSegments == 0 && IsRightChild(node)) || (node->numSegments > 0))) numInnerRegions += 1;
-    //         }
-    //     }
-
-    //     Region **innerRegions = (Region **)malloc(numInnerRegions * sizeof(Region *));
-    //     { /* find all inner regions */
-    //         usize regionIdx = 0;
-    //         for (usize i = 0; i < tree->size; i++)
-    //         {
-    //             BspNode *node = tree->meta[i].node;
-    //             if (IsLeaf(node))
-    //             {
-    //                 if (node->numSegments == 0 && IsRightChild(node))
-    //                     innerRegions[regionIdx++]
-    //                         = NewRegion(tree->meta[idxParent(tree, i)].region, node->parent->segments, node->parent->numSegments, SplitRight);
-    //                 else if (node->numSegments > 0) innerRegions[regionIdx++] = NewRegion(tree->meta[i].region, NULL, 0, SplitRight);
-    //             }
-    //         }
-    //     }
-
-    //     Vector2 randomCentroid;
-    //     { /*pick random inner region and find it's centroid */
-    //         int randIdx = rand() % numInnerRegions;
-    //         Region *region = innerRegions[randIdx];
-    //         f32 xSum = 0.0f, ySum = 0.0f;
-    //         for (usize i = 0; i < region->boundarySize; i++)
-    //         {
-    //             xSum += region->boundary[i].left.x;
-    //             ySum += region->boundary[i].left.y;
-    //         }
-    //         randomCentroid = (Vector2){
-    //             .x = xSum / region->boundarySize,
-    //             .y = ySum / region->boundarySize,
-    //         };
-    //     }
-
-    //     { /* set player initial position to random region centroid */
-    //         Vector2 initialDir = { 0.0f, -1.0f };
-    //         f32 hfov = PI / 4.0f;
-    //         scene->player = PlayerInit(randomCentroid, initialDir, hfov);
-    //         for (usize i = 0; i < numInnerRegions; i++)
-    //             FreeRegion(innerRegions[i]);
-    //         free(innerRegions);
-    //     }
-    // }
 
     scene->useBspTree = true;
     scene->initialized = true;
@@ -130,6 +76,8 @@ S3_Render(S3 *scene)
     if (IsKeyDown(KEY_D)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, 0.01f * movementMultiplier));
     if (IsKeyDown(KEY_LEFT)) PlayerRotate(&scene->player, -0.001f * rotationMultiplier);
     if (IsKeyDown(KEY_RIGHT)) PlayerRotate(&scene->player, 0.001f * rotationMultiplier);
+    if (IsKeyDown(KEY_UP)) PlayerUpdateFov(&scene->player, 0.0001f);
+    if (IsKeyDown(KEY_DOWN)) PlayerUpdateFov(&scene->player, -0.0001f);
     if (IsKeyPressed(KEY_SPACE)) scene->useBspTree = scene->useBspTree ^ true;
 
     BeginDrawing();
@@ -196,8 +144,12 @@ PlayerUpdate(Player *p)
 void
 PlayerMove(Player *p, Vector2 dir)
 {
-    p->pos = Vector2Add(p->pos, dir);
-    PlayerUpdate(p);
+    Vector2 newPos = Vector2Add(p->pos, dir);
+    if (newPos.x > 0 && newPos.x < WIDTH && newPos.y > 0 && newPos.y < HEIGHT)
+    {
+        p->pos = newPos;
+        PlayerUpdate(p);
+    }
 }
 
 void
@@ -206,6 +158,19 @@ PlayerRotate(Player *p, f32 angle)
     p->dir = Vector2Rotate(p->dir, angle);
     p->ldir = (Vector2){ -p->dir.y, p->dir.x };
     PlayerUpdate(p);
+}
+
+void
+PlayerUpdateFov(Player *p, f32 dt)
+{
+    f32 hfov = p->hfov + dt;
+    if ((hfov > 0.1) && (hfov < PI / 2.0f - 0.1))
+    {
+        p->hfov = hfov;
+        p->distance = babs(WIDTH / (2.0f * tanf(p->hfov)));
+        p->vfov = atanf(HEIGHT / (2.0f * p->distance));
+        PlayerUpdate(p);
+    }
 }
 
 void
@@ -251,11 +216,18 @@ DrawMinimap(S3 *scene)
     usize minimapWidth = scene->minimapRegion.right - scene->minimapRegion.left;
     usize minimapHeight = scene->minimapRegion.bottom - scene->minimapRegion.top;
     DrawRectangle(scene->minimapRegion.left, scene->minimapRegion.top, minimapWidth, minimapHeight, RAYWHITE);
+
     for (usize i = 0; i < scene->numSegments; i++)
         DrawLineEx(scene->minimap[i].origin, scene->minimap[i].dest, 3.0f, scene->colors[i]);
+
     Vector2 p = TranslatePoint(scene->player.pos, scene->minimapRegion);
-    DrawTriangle(Vector2Add(p, Vector2Scale(scene->player.dir, 10.0f)), Vector2Subtract(p, Vector2Scale(scene->player.ldir, 5.0f)),
-                 Vector2Add(p, Vector2Scale(scene->player.ldir, 5.0f)), RED);
+    Vector2 pp = Vector2Subtract(p, Vector2Scale(scene->player.dir, 10.0f));
+    DrawTriangle(p, Vector2Subtract(pp, Vector2Scale(scene->player.ldir, 5.0f)), Vector2Add(pp, Vector2Scale(scene->player.ldir, 5.0f)), RED);
+
+    FSegment left = TranslateSegment(scene->player.left, scene->minimapRegion);
+    FSegment right = TranslateSegment(scene->player.right, scene->minimapRegion);
+    DrawLineEx(left.origin, left.dest, 2.0f, BLACK);
+    DrawLineEx(right.origin, right.dest, 2.0f, BLACK);
 }
 
 void
@@ -333,4 +305,13 @@ TranslatePoint(Vector2 pt, BoundingRegion region)
     f32 newX = region.left + pt.x * ((f32)(region.right - region.left) / WIDTH);
     f32 newY = region.top + pt.y * ((f32)(region.bottom - region.top) / HEIGHT);
     return (Vector2){ newX, newY };
+}
+
+FSegment
+TranslateSegment(FSegment segment, BoundingRegion region)
+{
+    return (FSegment){
+        .origin = TranslatePoint(segment.origin, region),
+        .dest = TranslatePoint(segment.dest, region),
+    };
 }
