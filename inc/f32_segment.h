@@ -5,8 +5,6 @@
 #include "f64_segment.h"
 #include <stdbool.h>
 
-#define F32_EPSILON 0.0001f
-
 typedef struct FSegment {
     Vector2 origin;
     Vector2 dest;

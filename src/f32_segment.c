@@ -20,7 +20,7 @@ BuildFSegments(const DSegment *dSegments, usize numSegments, BoundingRegion regi
         if (dSegments[i].left.y > yMax) yMax = dSegments[i].left.y;
     }
 
-    f64 scale = min((f64)width / (xMax - xMin), (f64)height / (yMax - yMin));
+    f64 scale = min((f64)width / (xMax - xMin), (f64)height / (yMax - yMin)) * 0.9;
     f64 xPadding = (width - (xMax + xMin) * scale) / 2.0f + region.left;
     f64 yPadding = (height - (yMax + yMin) * scale) / 2.0f + region.top;
 
@@ -63,7 +63,7 @@ FSegmentSide(FSegment s, Vector2 pt)
     Vector2 pq = Vector2Subtract(s.dest, s.origin);
     Vector2 pr = Vector2Subtract(pt, s.origin);
     f32 det = Vector2Determinant(pq, pr);
-    if (babs(det) < F32_EPSILON) return FSideInside;
+    if (babs(det) < BSP_EPSILON) return FSideInside;
     else if (det >= 0.0) return FSideLeft;
     else return FSideRight;
 }
@@ -76,9 +76,9 @@ FSegmentSides(FSegment u, FSegment v)
     Vector2 ps = Vector2Subtract(v.dest, u.origin);
     f32 leftSide = Vector2Determinant(pq, pr);
     f32 rightSide = Vector2Determinant(pq, ps);
-    if (babs(leftSide) < F32_EPSILON && babs(rightSide) < F32_EPSILON) return FSideInside;
-    else if (leftSide + F32_EPSILON > 0 && rightSide + F32_EPSILON > 0) return FSideLeft;
-    else if (leftSide - F32_EPSILON < 0 && rightSide - F32_EPSILON < 0) return FSideRight;
+    if (babs(leftSide) < BSP_EPSILON && babs(rightSide) < BSP_EPSILON) return FSideInside;
+    else if (leftSide + BSP_EPSILON > 0 && rightSide + BSP_EPSILON > 0) return FSideLeft;
+    else if (leftSide - BSP_EPSILON < 0 && rightSide - BSP_EPSILON < 0) return FSideRight;
     else return FSideBoth;
 }
 
@@ -114,11 +114,11 @@ FSegmentContainsPoint(FSegment s, Vector2 pt)
     f32 a = s.dest.y - s.origin.y;
     f32 b = s.origin.x - s.dest.x;
     f32 c = (s.dest.x * s.origin.y) - (s.origin.x * s.dest.y);
-    if (babs(a * pt.x + b * pt.y + c) > F32_EPSILON) return false;
-    if (pt.x < (min(s.origin.x, s.dest.x) - F32_EPSILON)) return false;
-    if (pt.x > (max(s.origin.x, s.dest.x) + F32_EPSILON)) return false;
-    if (pt.y < (min(s.origin.y, s.dest.y) - F32_EPSILON)) return false;
-    if (pt.y > (max(s.origin.y, s.dest.y) + F32_EPSILON)) return false;
+    if (babs(a * pt.x + b * pt.y + c) > BSP_EPSILON) return false;
+    if (pt.x < (min(s.origin.x, s.dest.x) - BSP_EPSILON)) return false;
+    if (pt.x > (max(s.origin.x, s.dest.x) + BSP_EPSILON)) return false;
+    if (pt.y < (min(s.origin.y, s.dest.y) - BSP_EPSILON)) return false;
+    if (pt.y > (max(s.origin.y, s.dest.y) + BSP_EPSILON)) return false;
     return true;
 }
 
@@ -127,7 +127,7 @@ FSegmentsParallel(FSegment s1, FSegment s2)
 {
     Vector2 pq = Vector2Subtract(s1.dest, s1.origin);
     Vector2 rs = Vector2Subtract(s2.dest, s2.origin);
-    return babs((pq.x * rs.y - pq.y * rs.x)) < F32_EPSILON;
+    return babs((pq.x * rs.y - pq.y * rs.x)) < BSP_EPSILON;
 }
 
 bool

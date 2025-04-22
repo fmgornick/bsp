@@ -14,6 +14,7 @@
 void DrawWall(Player p, FSegment s, f32 height, Color color);
 void DrawNode(BspNode *node, Player p);
 void DrawScene(BspNode *node, Player p);
+void DrawSceneReverse(BspNode *node, Player p);
 Vector2 TranslatePoint(Vector2 pt, BoundingRegion region);
 FSegment TranslateSegment(FSegment segment, BoundingRegion region);
 /* ************************************************************* */
@@ -72,6 +73,7 @@ S3_Render(S3 *scene)
     f32 rotationMultiplier = 0.5f;
     f32 fovMultiplier = 1.0f;
 #endif
+
     if (IsKeyDown(KEY_W)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, 0.01f * movementMultiplier));
     if (IsKeyDown(KEY_A)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, -0.01f * movementMultiplier));
     if (IsKeyDown(KEY_S)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, -0.01f * movementMultiplier));
@@ -85,11 +87,7 @@ S3_Render(S3 *scene)
     BeginDrawing();
     ClearBackground(RAYWHITE);
     if (scene->useBspTree) DrawScene(scene->tree, scene->player);
-    else
-    {
-        for (BspNode *node = MinNode(scene->tree); node != NULL; node = SuccNode(node))
-            DrawNode(node, scene->player);
-    }
+    else DrawSceneReverse(scene->tree, scene->player);
     DrawMinimap(scene);
     EndDrawing();
 
@@ -181,8 +179,8 @@ DrawNode(BspNode *node, Player p)
     for (usize i = 0; i < node->numSegments; i++)
     {
         FSegment segment = {
-            .origin = (Vector2){ node->segments[0].left.x, node->segments[0].left.y },
-            .dest = (Vector2){ node->segments[0].right.x, node->segments[0].right.y },
+            .origin = (Vector2){ node->segments[i].left.x, node->segments[i].left.y },
+            .dest = (Vector2){ node->segments[i].right.x, node->segments[i].right.y },
         };
         DrawWall(p, segment, 100.0f * p.vfov, node->color);
     }
@@ -209,6 +207,30 @@ DrawScene(BspNode *node, Player p)
     {
         DrawScene(node->left, p);
         DrawScene(node->right, p);
+    }
+}
+
+void
+DrawSceneReverse(BspNode *node, Player p)
+{
+    if (node == NULL) return;
+    else if (IsLeaf(node)) DrawNode(node, p);
+    else if (DSegmentSide(node->segments[0], (DVector2){ p.pos.x, p.pos.y }) == DSideRight)
+    {
+        DrawScene(node->left, p);
+        DrawNode(node, p);
+        DrawScene(node->right, p);
+    }
+    else if (DSegmentSide(node->segments[0], (DVector2){ p.pos.x, p.pos.y }) == DSideLeft)
+    {
+        DrawScene(node->right, p);
+        DrawNode(node, p);
+        DrawScene(node->left, p);
+    }
+    else
+    {
+        DrawScene(node->right, p);
+        DrawScene(node->left, p);
     }
 }
 
@@ -288,30 +310,26 @@ DrawWall(Player p, FSegment s, f32 height, Color color)
 
     if (Vector2DotProduct(p.dir, Vector2Subtract(sp.origin, p.pos)) < 0.0f && Vector2DotProduct(p.dir, Vector2Subtract(sp.dest, p.pos)) < 0.0f) return;
 
-    // if (playerLeftShapeOriginSide == FSideLeft && playerLeftShapeDestSide == FSideRight) sp.origin = FSegmentIntersection(p.left, s);
-    // if (playerLeftShapeOriginSide == FSideRight && playerLeftShapeDestSide == FSideLeft) sp.dest = FSegmentIntersection(p.left, s);
-    // if (playerRightShapeOriginSide == FSideLeft && playerRightShapeDestSide == FSideRight) sp.dest = FSegmentIntersection(p.right, s);
-    // if (playerRightShapeOriginSide == FSideRight && playerRightShapeDestSide == FSideLeft) sp.origin = FSegmentIntersection(p.right, s);
-
     if (playerLeftShapeOriginSide == FSideLeft && playerLeftShapeDestSide == FSideRight)
     {
         Vector2 intersection = FSegmentIntersection(p.left, s);
         if (Vector2DotProduct(p.dir, Vector2Subtract(intersection, p.pos)) < 0) return;
         else sp.origin = intersection;
     }
-    if (playerLeftShapeOriginSide == FSideRight && playerLeftShapeDestSide == FSideLeft)
+    else if (playerLeftShapeOriginSide == FSideRight && playerLeftShapeDestSide == FSideLeft)
     {
         Vector2 intersection = FSegmentIntersection(p.left, s);
         if (Vector2DotProduct(p.dir, Vector2Subtract(intersection, p.pos)) < 0) return;
         else sp.dest = intersection;
     }
+
     if (playerRightShapeOriginSide == FSideLeft && playerRightShapeDestSide == FSideRight)
     {
         Vector2 intersection = FSegmentIntersection(p.right, s);
         if (Vector2DotProduct(p.dir, Vector2Subtract(intersection, p.pos)) < 0) return;
         else sp.dest = intersection;
     }
-    if (playerRightShapeOriginSide == FSideRight && playerRightShapeDestSide == FSideLeft)
+    else if (playerRightShapeOriginSide == FSideRight && playerRightShapeDestSide == FSideLeft)
     {
         Vector2 intersection = FSegmentIntersection(p.right, s);
         if (Vector2DotProduct(p.dir, Vector2Subtract(intersection, p.pos)) < 0) return;
@@ -333,6 +351,7 @@ DrawWall(Player p, FSegment s, f32 height, Color color)
     Vector2 y = { WIDTH - projDest, HEIGHT / 2.0f + heightDest };
     Vector2 z = { WIDTH - projDest, HEIGHT / 2.0f - heightDest };
     Vector2 w = { WIDTH - projOrigin, HEIGHT / 2.0f - heightOrigin };
+    // if (color.r == 102) printf("SDJKFHSDFKLJH\n");
     DrawTriangle(x, y, z, color);
     DrawTriangle(x, z, w, color);
 }
