@@ -163,9 +163,9 @@ BspTreeStepBack(S2 *scene)
 {
     scene->building = false;
     BspTreeMeta *tree = scene->tree;
-    if (tree->active == tree->root) return;
-    if (tree->active->right && tree->meta[idxRight(tree, tree->activeIdx)].visible) BspTreeMetaMoveRight(tree);
-    else if (tree->active->right && tree->meta[idxLeft(tree, tree->activeIdx)].visible) BspTreeMetaMoveLeft(tree);
+    if (tree->active == tree->root && !tree->meta[idxLeft(tree, tree->activeIdx)].visible) return;
+    else if (tree->active->right && tree->meta[idxRight(tree, tree->activeIdx)].visible) BspTreeMetaMoveRight(tree);
+    else if (tree->active->left && tree->meta[idxLeft(tree, tree->activeIdx)].visible) BspTreeMetaMoveLeft(tree);
     else
     {
         tree->meta[tree->activeIdx].visible = false;
