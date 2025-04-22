@@ -108,6 +108,7 @@ S3_Init(IVector2 *polygon, usize numVertices, S3 *scene)
     //     }
     // }
 
+    scene->useBspTree = true;
     scene->initialized = true;
 
     return S3_PENDING;
@@ -117,10 +118,10 @@ BspStage
 S3_Render(S3 *scene)
 {
 #ifdef WASM
-    f32 movementMultiplier = 100.0f;
-    f32 rotationMultiplier = 50.0f;
+    f32 movementMultiplier = 400.0f;
+    f32 rotationMultiplier = 100.0f;
 #else
-    f32 movementMultiplier = 2.0f;
+    f32 movementMultiplier = 4.0f;
     f32 rotationMultiplier = 1.0f;
 #endif
     if (IsKeyDown(KEY_W)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, 0.01f * movementMultiplier));
@@ -129,37 +130,17 @@ S3_Render(S3 *scene)
     if (IsKeyDown(KEY_D)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, 0.01f * movementMultiplier));
     if (IsKeyDown(KEY_LEFT)) PlayerRotate(&scene->player, -0.001f * rotationMultiplier);
     if (IsKeyDown(KEY_RIGHT)) PlayerRotate(&scene->player, 0.001f * rotationMultiplier);
+    if (IsKeyPressed(KEY_SPACE)) scene->useBspTree = scene->useBspTree ^ true;
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
-
-    // for (BspNode *node = MinNode(scene->tree); node != NULL; node = SuccNode(node))
-    //     DrawNode(node, scene->player);
-
-    DrawScene(scene->tree, scene->player);
-
+    if (scene->useBspTree) DrawScene(scene->tree, scene->player);
+    else
     {
-        usize minimapWidth = scene->minimapRegion.right - scene->minimapRegion.left;
-        usize minimapHeight = scene->minimapRegion.bottom - scene->minimapRegion.top;
-        DrawRectangle(scene->minimapRegion.left, scene->minimapRegion.top, minimapWidth, minimapHeight, RAYWHITE);
-        for (usize i = 0; i < scene->numSegments; i++)
-            DrawLineEx(scene->minimap[i].origin, scene->minimap[i].dest, 3.0f, scene->colors[i]);
-        Vector2 p = TranslatePoint(scene->player.pos, scene->minimapRegion);
-        DrawTriangle(Vector2Add(p, Vector2Scale(scene->player.dir, 10.0f)), Vector2Subtract(p, Vector2Scale(scene->player.ldir, 5.0f)),
-                     Vector2Add(p, Vector2Scale(scene->player.ldir, 5.0f)), RED);
+        for (BspNode *node = MinNode(scene->tree); node != NULL; node = SuccNode(node))
+            DrawNode(node, scene->player);
     }
-
-    // for (BspNode *node = MinNode(scene->tree->root); node != NULL; node = SuccNode(node))
-    // {
-    //     DrawNode(node, scene->player);
-    // if (node->numSegments > 0)
-    // {
-    // Vector2 left = { node->segments[0].left.x, node->segments[0].left.y };
-    // Vector2 right = { node->segments[0].right.x, node->segments[0].right.y };
-    // DrawLineEx(left, right, 3.0f, BLUE);
-    // }
-    // }
-
+    DrawMinimap(scene);
     EndDrawing();
 
     return S3_PENDING;
@@ -262,6 +243,19 @@ DrawScene(BspNode *node, Player p)
         DrawScene(node->left, p);
         DrawScene(node->right, p);
     }
+}
+
+void
+DrawMinimap(S3 *scene)
+{
+    usize minimapWidth = scene->minimapRegion.right - scene->minimapRegion.left;
+    usize minimapHeight = scene->minimapRegion.bottom - scene->minimapRegion.top;
+    DrawRectangle(scene->minimapRegion.left, scene->minimapRegion.top, minimapWidth, minimapHeight, RAYWHITE);
+    for (usize i = 0; i < scene->numSegments; i++)
+        DrawLineEx(scene->minimap[i].origin, scene->minimap[i].dest, 3.0f, scene->colors[i]);
+    Vector2 p = TranslatePoint(scene->player.pos, scene->minimapRegion);
+    DrawTriangle(Vector2Add(p, Vector2Scale(scene->player.dir, 10.0f)), Vector2Subtract(p, Vector2Scale(scene->player.ldir, 5.0f)),
+                 Vector2Add(p, Vector2Scale(scene->player.ldir, 5.0f)), RED);
 }
 
 void

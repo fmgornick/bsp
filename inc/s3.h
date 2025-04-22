@@ -23,6 +23,7 @@ typedef struct S3 {
     FSegment *minimap;
     BoundingRegion minimapRegion;
     BspNode *tree;
+    bool useBspTree;
     bool initialized;
 } S3;
 
@@ -30,5 +31,8 @@ BspStage S3_Init(IVector2 *polygon, usize numVertices, S3 *scene);
 BspStage S3_Render(S3 *scene);
 BspStage S3_RenderFailure(S3 *scene);
 void S3_Free(S3 *scene);
+
+// void DrawScene(S3 *scene);
+void DrawMinimap(S3 *scene);
 
 #endif // S3_H_
