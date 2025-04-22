@@ -64,7 +64,7 @@ mod(isize i, isize n)
 static inline f32
 rand_f32(f32 min, f32 max)
 {
-    return min + (f32)rand() / RAND_MAX * (max - min);
+    return min + (f32)rand() / (f32)RAND_MAX * (max - min);
 }
 
 static inline void

@@ -65,10 +65,12 @@ S3_Render(S3 *scene)
 {
 #ifdef WASM
     f32 movementMultiplier = 400.0f;
-    f32 rotationMultiplier = 100.0f;
+    f32 rotationMultiplier = 40.0f;
+    f32 fovMultiplier = 80.0f;
 #else
-    f32 movementMultiplier = 4.0f;
-    f32 rotationMultiplier = 1.0f;
+    f32 movementMultiplier = 5.0f;
+    f32 rotationMultiplier = 0.5f;
+    f32 fovMultiplier = 1.0f;
 #endif
     if (IsKeyDown(KEY_W)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, 0.01f * movementMultiplier));
     if (IsKeyDown(KEY_A)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, -0.01f * movementMultiplier));
@@ -76,8 +78,8 @@ S3_Render(S3 *scene)
     if (IsKeyDown(KEY_D)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, 0.01f * movementMultiplier));
     if (IsKeyDown(KEY_LEFT)) PlayerRotate(&scene->player, -0.001f * rotationMultiplier);
     if (IsKeyDown(KEY_RIGHT)) PlayerRotate(&scene->player, 0.001f * rotationMultiplier);
-    if (IsKeyDown(KEY_UP)) PlayerUpdateFov(&scene->player, 0.0001f);
-    if (IsKeyDown(KEY_DOWN)) PlayerUpdateFov(&scene->player, -0.0001f);
+    if (IsKeyDown(KEY_UP)) PlayerUpdateFov(&scene->player, 0.0001f * fovMultiplier);
+    if (IsKeyDown(KEY_DOWN)) PlayerUpdateFov(&scene->player, -0.0001f * fovMultiplier);
     if (IsKeyPressed(KEY_SPACE)) scene->useBspTree = scene->useBspTree ^ true;
 
     BeginDrawing();
@@ -182,7 +184,7 @@ DrawNode(BspNode *node, Player p)
             .origin = (Vector2){ node->segments[0].left.x, node->segments[0].left.y },
             .dest = (Vector2){ node->segments[0].right.x, node->segments[0].right.y },
         };
-        DrawWall(p, segment, 30.0f, node->color);
+        DrawWall(p, segment, 100.0f * p.vfov, node->color);
     }
 }
 
@@ -213,21 +215,57 @@ DrawScene(BspNode *node, Player p)
 void
 DrawMinimap(S3 *scene)
 {
-    usize minimapWidth = scene->minimapRegion.right - scene->minimapRegion.left;
-    usize minimapHeight = scene->minimapRegion.bottom - scene->minimapRegion.top;
-    DrawRectangle(scene->minimapRegion.left, scene->minimapRegion.top, minimapWidth, minimapHeight, RAYWHITE);
+    BoundingRegion region = scene->minimapRegion;
+    usize minimapWidth = region.right - region.left;
+    usize minimapHeight = region.bottom - region.top;
+    DrawRectangle(region.left, region.top, minimapWidth, minimapHeight, RAYWHITE);
 
     for (usize i = 0; i < scene->numSegments; i++)
         DrawLineEx(scene->minimap[i].origin, scene->minimap[i].dest, 3.0f, scene->colors[i]);
 
-    Vector2 p = TranslatePoint(scene->player.pos, scene->minimapRegion);
+    Vector2 p = TranslatePoint(scene->player.pos, region);
     Vector2 pp = Vector2Subtract(p, Vector2Scale(scene->player.dir, 10.0f));
     DrawTriangle(p, Vector2Subtract(pp, Vector2Scale(scene->player.ldir, 5.0f)), Vector2Add(pp, Vector2Scale(scene->player.ldir, 5.0f)), RED);
 
-    FSegment left = TranslateSegment(scene->player.left, scene->minimapRegion);
-    FSegment right = TranslateSegment(scene->player.right, scene->minimapRegion);
-    DrawLineEx(left.origin, left.dest, 2.0f, BLACK);
-    DrawLineEx(right.origin, right.dest, 2.0f, BLACK);
+    { /*
+       * find region enclosed by vewport in minimap
+       * triangulate this region and shade it so the user knows what should be visible
+       */
+        FSegment left = TranslateSegment(scene->player.left, region);
+        FSegment right = TranslateSegment(scene->player.right, region);
+        left.dest.x += (left.dest.x - left.origin.x);
+        left.dest.y += (left.dest.y - left.origin.y);
+        right.dest.x += (right.dest.x - right.origin.x);
+        right.dest.y += (right.dest.y - right.origin.y);
+        FSegment regions[4] = {
+            (FSegment){ (Vector2){ region.left, region.top }, (Vector2){ region.right, region.top } },
+            (FSegment){ (Vector2){ region.right, region.top }, (Vector2){ region.right, region.bottom } },
+            (FSegment){ (Vector2){ region.right, region.bottom }, (Vector2){ region.left, region.bottom } },
+            (FSegment){ (Vector2){ region.left, region.bottom }, (Vector2){ region.left, region.top } },
+        };
+        Vector2 points[5];
+        usize i, numPoints = 0;
+        for (i = 0; i < 4; i++)
+        {
+            if (FSegmentsIntersect(right, regions[i]))
+            {
+                points[numPoints++] = FSegmentIntersection(right, regions[i]);
+                break;
+            }
+        }
+        assert(numPoints == 1);
+        for (usize j = i; j != mod(i - 1, 4); j = mod(j + 1, 4))
+        {
+            if (FSegmentsIntersect(left, regions[j]))
+            {
+                points[numPoints++] = FSegmentIntersection(left, regions[j]);
+                break;
+            }
+            else points[numPoints++] = regions[j].dest;
+        }
+        for (usize k = 0; k < numPoints - 1; k++)
+            DrawTriangle(p, points[k + 1], points[k], Fade(BLUE, 0.5));
+    }
 }
 
 void
