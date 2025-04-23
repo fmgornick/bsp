@@ -23,21 +23,26 @@ typedef struct S2 {
 } S2;
 
 /* clang-format off */
-static const char BUILD_TREE_HELP_MENU[5][128] = {
+static const char S2_PT1_HELP_MENU[7][128] = {
     "- toggle help menu : H",
+    "- quit demonstration : Q",
+    "- restart from beginning : R",
     "- step forward through BSP build : RIGHT",
     "- step backwards through BSP build : LEFT",
     "- play/pause BSP build at a fixed rate : SPACE",
-    "- skip to the end of the BSP build : RETURN",
+    "- skip to the end to reveal full tree : RETURN",
 };
 
-static const char NAV_TREE_HELP_MENU[6][128] = {
+static const char S2_PT2_HELP_MENU[9][128] = {
     "- toggle help menu : H",
+    "- quit demonstration : Q",
+    "- restart from beginning : R",
     "- navigate to specific BSP node : CLICK",
     "- navigate to left child : LEFT",
     "- navigate to right child : RIGHT",
     "- navigate to parent : UP",
     "- toggle BSP region mosaic : F",
+    "- continue to 3D rendering portion : RETURN",
 };
 /* clang-format on */
 

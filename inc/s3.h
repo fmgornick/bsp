@@ -23,9 +23,23 @@ typedef struct S3 {
     FSegment *minimap;
     BoundingRegion minimapRegion;
     BspNode *tree;
+    Vector2 helpButton;
     bool useBspTree;
     bool initialized;
+    bool helpMenu;
 } S3;
+
+/* clang-format off */
+static const char S3_HELP_MENU[7][128] = {
+    "- toggle help menu : H",
+    "- quit demonstration : Q",
+    "- restart from beginning : R",
+    "- move character w.r.t. viewing direction : W/A/S/D",
+    "- rotate viewing direction : LEFT/RIGHT",
+    "- increase/decrease field of view : UP/DOWN",
+    "- toggle on/off BSP Tree rendering : SPACE",
+};
+/* clang-format on */
 
 BspStage S3_Init(IVector2 *polygon, usize numVertices, S3 *scene);
 BspStage S3_Render(S3 *scene);

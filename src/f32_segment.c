@@ -11,7 +11,7 @@ BuildFSegments(const DSegment *dSegments, usize numSegments, BoundingRegion regi
     FSegment *segments = (FSegment *)malloc(numSegments * sizeof(FSegment));
 
     /* we want to resize the polygon from stage one to fit our stage 2 split screen */
-    f32 xMin = MAXFLOAT, yMin = MAXFLOAT, xMax = 0, yMax = 0;
+    f32 xMin = F32_MAX, yMin = F32_MAX, xMax = 0, yMax = 0;
     for (usize i = 0; i < numSegments; i++)
     {
         if (dSegments[i].left.x < xMin) xMin = dSegments[i].left.x;

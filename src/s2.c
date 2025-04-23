@@ -108,14 +108,15 @@ S2_Render(S2 *scene)
     }
 
     BeginDrawing();
+
     ClearBackground(WHITE);
     DrawSegments(scene->segments, scene->numSegments);
     DrawBspTreeMeta(scene->tree);
     if (scene->drawAllRegions) DrawAllBspRegions(scene);
     else DrawRegion(scene->tree->activeRegion);
 
-    if (scene->helpMenu && !scene->treeBuilt) DrawHelpMenu(BUILD_TREE_HELP_MENU, 5);
-    if (scene->helpMenu && scene->treeBuilt) DrawHelpMenu(NAV_TREE_HELP_MENU, 6);
+    if (scene->helpMenu && !scene->treeBuilt) DrawHelpMenu(S2_PT1_HELP_MENU, 7);
+    if (scene->helpMenu && scene->treeBuilt) DrawHelpMenu(S2_PT2_HELP_MENU, 9);
     if (scene->buildMessage) DrawMessage("Build BSP Tree (Press 'H' to toggle help menu)", BLACK, BEIGE);
     if (scene->navMessage) DrawMessage("Navigate BSP Tree (Press 'H' to toggle help menu)", BLACK, BEIGE);
     DrawHelpMenuButton(scene->helpButton);
@@ -137,6 +138,7 @@ S2_Free(S2 *scene)
     FreeSegments(scene->segments);
     FreeBspTreeMeta(scene->tree);
     scene->initialized = false;
+    *scene = (S2){ 0 };
 }
 
 void

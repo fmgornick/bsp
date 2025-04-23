@@ -8,6 +8,7 @@
 #define HEIGHT 720
 #define MAX_VERTICES 24
 #define BSP_EPSILON 0.000001f
+#define F32_MAX 0x1.fffffep+127f
 
 #define babs(x) ((x) < 0 ? -(x) : (x))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
@@ -45,6 +46,9 @@ typedef enum BspStage {
     S3_PENDING,
     S3_FAILED,
     S3_COMPLETED,
+
+    QUIT,
+    RESTART,
 } BspStage;
 
 typedef struct BoundingRegion {

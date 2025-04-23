@@ -55,8 +55,11 @@ S3_Init(IVector2 *polygon, usize numVertices, S3 *scene)
         }
     }
 
+    scene->helpButton = (Vector2){ WIDTH - 40, HEIGHT - 40 };
+    scene->helpMenu = true;
     scene->useBspTree = true;
     scene->initialized = true;
+    FreeSegments(segments);
 
     return S3_PENDING;
 }
@@ -73,6 +76,9 @@ S3_Render(S3 *scene)
     f32 rotationMultiplier = 0.5f;
     f32 fovMultiplier = 1.0f;
 #endif
+    if (IsKeyPressed(KEY_H)) scene->helpMenu = !scene->helpMenu;
+    else if (HelpButtonClicked(scene->helpButton)) scene->helpMenu = !scene->helpMenu;
+    else if (GetKeyPressed() || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) scene->helpMenu = false;
 
     if (IsKeyDown(KEY_W)) PlayerMove(&scene->player, Vector2Scale(scene->player.dir, 0.01f * movementMultiplier));
     if (IsKeyDown(KEY_A)) PlayerMove(&scene->player, Vector2Scale(scene->player.ldir, -0.01f * movementMultiplier));
@@ -85,10 +91,16 @@ S3_Render(S3 *scene)
     if (IsKeyPressed(KEY_SPACE)) scene->useBspTree = !scene->useBspTree;
 
     BeginDrawing();
+
     ClearBackground(RAYWHITE);
+    DrawRectangle(0, HEIGHT / 2, WIDTH, HEIGHT / 2, LIGHTGRAY);
     if (scene->useBspTree) DrawScene(scene->tree, scene->player);
     else DrawSceneReverse(scene->tree, scene->player);
     DrawMinimap(scene);
+
+    if (scene->helpMenu) DrawHelpMenu(S3_HELP_MENU, 7);
+    DrawHelpMenuButton(scene->helpButton);
+
     EndDrawing();
 
     return S3_PENDING;
@@ -103,9 +115,11 @@ S3_RenderFailure(S3 *scene)
 void
 S3_Free(S3 *scene)
 {
-    // FreeSegments(scene->segments);
-    // FreeBspTreeMeta(scene->tree);
+    free(scene->minimap);
+    free(scene->colors);
+    FreeBspTree(scene->tree);
     scene->initialized = false;
+    *scene = (S3){ 0 };
 }
 
 Player
@@ -240,7 +254,9 @@ DrawMinimap(S3 *scene)
     BoundingRegion region = scene->minimapRegion;
     usize minimapWidth = region.right - region.left;
     usize minimapHeight = region.bottom - region.top;
-    DrawRectangle(region.left, region.top, minimapWidth, minimapHeight, RAYWHITE);
+    Rectangle rec = { region.left, region.top, minimapWidth, minimapHeight };
+    DrawRectangleRec(rec, RAYWHITE);
+    DrawRectangleLinesEx(rec, 3.0f, BLACK);
 
     for (usize i = 0; i < scene->numSegments; i++)
         DrawLineEx(scene->minimap[i].origin, scene->minimap[i].dest, 3.0f, scene->colors[i]);

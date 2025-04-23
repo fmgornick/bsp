@@ -63,14 +63,6 @@ S1_RenderFailure(S1 *scene)
     DrawPolygon(scene);
     DrawMessage("too many vertices: press 'R' if you would like to start over", BLACK, RED);
 
-    if (IsKeyPressed(KEY_R))
-    {
-        scene->currentCell->active = false;
-        scene->currentCell = &scene->grid[0][0];
-        scene->numVertices = 0;
-        return S1_PENDING;
-    }
-
     EndDrawing();
     return S1_FAILED;
 }
@@ -79,6 +71,7 @@ void
 S1_Free(S1 *scene)
 {
     scene->initialized = false;
+    *scene = (S1){ 0 };
 }
 
 void
