@@ -5,6 +5,7 @@
 #include "raylib.h"
 #include "region.h"
 #include "triangulation.h"
+#include <stdbool.h>
 
 /* ********** helpers ********** */
 /* ***************************** */
@@ -39,15 +40,27 @@ S2_Init(IVector2 *polygon, usize numVertices, S2 *scene)
     scene->drawAllRegions = false;
     scene->initialized = true;
 
+    scene->helpMenu = false;
+    scene->buildMessage = true;
+    scene->navMessage = false;
+    scene->helpButton = (Vector2){ WIDTH - 40, HEIGHT - 40 };
+
     return S2_PENDING;
 }
 
 BspStage
 S2_Render(S2 *scene)
 {
-    if (!scene->treeBuilt)
+    if (IsKeyPressed(KEY_H)) scene->helpMenu = !scene->helpMenu;
+    else if (HelpButtonClicked(scene->helpButton)) scene->helpMenu = !scene->helpMenu;
+    else if (!scene->treeBuilt)
     {
-        if (IsKeyPressed(KEY_SPACE)) scene->building ^= true;
+        if (GetKeyPressed() || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            scene->buildMessage = false;
+            scene->helpMenu = false;
+        }
+        if (IsKeyPressed(KEY_SPACE)) scene->building = !scene->building;
         if (IsKeyPressed(KEY_RIGHT)) BspTreeStepForward(scene);
         if (IsKeyPressed(KEY_LEFT)) BspTreeStepBack(scene);
         if (IsKeyPressed(KEY_C)) BspTreeFastForward(scene);
@@ -66,11 +79,17 @@ S2_Render(S2 *scene)
         {
             BspTreeFastForward(scene);
             scene->treeBuilt = true;
+            scene->navMessage = true;
             scene->drawAllRegions = true;
         }
     }
     else
     {
+        if (GetKeyPressed() || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            scene->navMessage = false;
+            scene->helpMenu = false;
+        }
         if (IsKeyPressed(KEY_ENTER)) return S2_COMPLETED;
         if (IsKeyPressed(KEY_LEFT)) BspTreeMetaMoveLeft(scene->tree);
         if (IsKeyPressed(KEY_RIGHT)) BspTreeMetaMoveRight(scene->tree);
@@ -85,7 +104,7 @@ S2_Render(S2 *scene)
             BspTreeMetaSetActive(scene->tree, i);
             scene->drawAllRegions = false;
         }
-        if (IsKeyPressed(KEY_F)) scene->drawAllRegions ^= true;
+        if (IsKeyPressed(KEY_F)) scene->drawAllRegions = !scene->drawAllRegions;
     }
 
     BeginDrawing();
@@ -94,6 +113,13 @@ S2_Render(S2 *scene)
     DrawBspTreeMeta(scene->tree);
     if (scene->drawAllRegions) DrawAllBspRegions(scene);
     else DrawRegion(scene->tree->activeRegion);
+
+    if (scene->helpMenu && !scene->treeBuilt) DrawHelpMenu(BUILD_TREE_HELP_MENU, 5);
+    if (scene->helpMenu && scene->treeBuilt) DrawHelpMenu(NAV_TREE_HELP_MENU, 6);
+    if (scene->buildMessage) DrawMessage("Build BSP Tree (Press 'H' to toggle help menu)", BLACK, BEIGE);
+    if (scene->navMessage) DrawMessage("Navigate BSP Tree (Press 'H' to toggle help menu)", BLACK, BEIGE);
+    DrawHelpMenuButton(scene->helpButton);
+
     EndDrawing();
 
     return S2_PENDING;

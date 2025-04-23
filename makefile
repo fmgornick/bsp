@@ -1,4 +1,4 @@
-FLAGS=-g -Wall -Iinc -I/usr/local/include/raylib
+FLAGS=-std=c11 -g -Wall -Iinc -I/usr/local/include/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
 SANITIZE=-fsanitize=address
 # SANITIZE=

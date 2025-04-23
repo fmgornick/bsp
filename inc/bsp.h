@@ -77,6 +77,50 @@ DrawMessage(char *msg, Color fg, Color bg)
     DrawText(msg, xPos, yPos, 20, fg);
 }
 
+static inline void
+DrawHelpMenu(const char (*commands)[128], usize numCommands)
+{
+    u32 helpMenuSize = MeasureText("HELP MENU", 40);
+    u32 commandSize = 0;
+    for (usize i = 0; i < numCommands; i++)
+        commandSize = max(commandSize, MeasureText(commands[i], 20));
+    u32 height = 60 + 30 * numCommands;
+    u32 width = 20 + commandSize;
+    f32 x = (f32)(WIDTH - width) / 2;
+    f32 y = (f32)(HEIGHT - height) / 2;
+
+    Rectangle rec = { x, y, width, height };
+    DrawRectangleRec(rec, RAYWHITE);
+    DrawRectangleLinesEx(rec, 3.0f, BLACK);
+
+    u32 xPos = rec.x + (rec.width - helpMenuSize) / 2;
+    u32 yPos = rec.y + 10;
+    DrawText("HELP MENU", xPos, yPos, 40, BLACK);
+
+    xPos = rec.x + (rec.width - commandSize) / 2;
+    yPos += 50;
+    for (usize i = 0; i < numCommands; i++)
+    {
+        DrawText(commands[i], xPos, yPos, 20, BLACK);
+        yPos += 30;
+    }
+}
+
+static inline void
+DrawHelpMenuButton(Vector2 pos)
+{
+    DrawCircle(pos.x, pos.y, 23, BLACK);
+    DrawCircle(pos.x, pos.y, 20, RAYWHITE);
+    DrawText("?", pos.x - 12, pos.y - 16, 40, BLACK);
+}
+
+static inline bool
+HelpButtonClicked(Vector2 pos)
+{
+    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return false;
+    else return CheckCollisionPointCircle(GetMousePosition(), pos, 23);
+}
+
 static inline f32
 Vector2Determinant(Vector2 v1, Vector2 v2)
 {

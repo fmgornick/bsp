@@ -50,7 +50,7 @@ main(isize argc, char *argv[])
             break;
 
         case S3_INITIALIZING:
-            stage = S3_Init(complexPolygon, complexNumVertices, &s3);
+            stage = S3_Init(s1.polygon, s1.numVertices, &s3);
             break;
 
         case S3_PENDING:

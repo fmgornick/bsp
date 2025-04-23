@@ -82,7 +82,7 @@ S3_Render(S3 *scene)
     if (IsKeyDown(KEY_RIGHT)) PlayerRotate(&scene->player, 0.001f * rotationMultiplier);
     if (IsKeyDown(KEY_UP)) PlayerUpdateFov(&scene->player, 0.0001f * fovMultiplier);
     if (IsKeyDown(KEY_DOWN)) PlayerUpdateFov(&scene->player, -0.0001f * fovMultiplier);
-    if (IsKeyPressed(KEY_SPACE)) scene->useBspTree = scene->useBspTree ^ true;
+    if (IsKeyPressed(KEY_SPACE)) scene->useBspTree = !scene->useBspTree;
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -255,10 +255,8 @@ DrawMinimap(S3 *scene)
        */
         FSegment left = TranslateSegment(scene->player.left, region);
         FSegment right = TranslateSegment(scene->player.right, region);
-        left.dest.x += (left.dest.x - left.origin.x);
-        left.dest.y += (left.dest.y - left.origin.y);
-        right.dest.x += (right.dest.x - right.origin.x);
-        right.dest.y += (right.dest.y - right.origin.y);
+        left.dest = Vector2Add(left.dest, Vector2Scale(Vector2Subtract(left.dest, left.origin), 10.0f));
+        right.dest = Vector2Add(right.dest, Vector2Scale(Vector2Subtract(right.dest, right.origin), 10.0f));
         FSegment regions[4] = {
             (FSegment){ (Vector2){ region.left, region.top }, (Vector2){ region.right, region.top } },
             (FSegment){ (Vector2){ region.right, region.top }, (Vector2){ region.right, region.bottom } },
@@ -276,8 +274,9 @@ DrawMinimap(S3 *scene)
             }
         }
         assert(numPoints == 1);
-        for (usize j = i; j != mod(i - 1, 4); j = mod(j + 1, 4))
+        for (usize jj = 0; jj < 4; jj++)
         {
+            usize j = mod(i + jj, 4);
             if (FSegmentsIntersect(left, regions[j]))
             {
                 points[numPoints++] = FSegmentIntersection(left, regions[j]);
