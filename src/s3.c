@@ -68,9 +68,9 @@ BspStage
 S3_Render(S3 *scene)
 {
 #ifdef WASM
-    f32 movementMultiplier = 400.0f;
-    f32 rotationMultiplier = 40.0f;
-    f32 fovMultiplier = 80.0f;
+    f32 movementMultiplier = 250.0f;
+    f32 rotationMultiplier = 25.0f;
+    f32 fovMultiplier = 50.0f;
 #else
     f32 movementMultiplier = 5.0f;
     f32 rotationMultiplier = 0.5f;
@@ -231,20 +231,20 @@ DrawSceneReverse(BspNode *node, Player p)
     else if (IsLeaf(node)) DrawNode(node, p);
     else if (DSegmentSide(node->segments[0], (DVector2){ p.pos.x, p.pos.y }) == DSideRight)
     {
-        DrawScene(node->left, p);
+        DrawSceneReverse(node->left, p);
         DrawNode(node, p);
-        DrawScene(node->right, p);
+        DrawSceneReverse(node->right, p);
     }
     else if (DSegmentSide(node->segments[0], (DVector2){ p.pos.x, p.pos.y }) == DSideLeft)
     {
-        DrawScene(node->right, p);
+        DrawSceneReverse(node->right, p);
         DrawNode(node, p);
-        DrawScene(node->left, p);
+        DrawSceneReverse(node->left, p);
     }
     else
     {
-        DrawScene(node->right, p);
-        DrawScene(node->left, p);
+        DrawSceneReverse(node->right, p);
+        DrawSceneReverse(node->left, p);
     }
 }
 
