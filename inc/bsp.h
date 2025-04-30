@@ -4,8 +4,8 @@
 #include "raylib.h"
 #include <stdlib.h>
 
-#define WIDTH 1280
-#define HEIGHT 720
+#define WIDTH 1600
+#define HEIGHT 900
 #define MAX_VERTICES 24
 #define BSP_EPSILON 0.000001f
 #define F32_MAX 0x1.fffffep+127f

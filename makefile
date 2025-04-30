@@ -1,4 +1,4 @@
-FLAGS=-std=c11 -g -Wall -Iinc -I/usr/local/include/raylib
+FLAGS=-std=c11 -O3 -Wall -Iinc -I/usr/local/include/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
 SANITIZE=-fsanitize=address
 # SANITIZE=
@@ -29,7 +29,7 @@ obj/%.o: src/%.c
 
 obj/web_%.o: src/%.c
 	@mkdir -p obj
-	emcc -DWASM -c $(FLAGS) $< -o $@
+	emcc -c $(FLAGS) $< -o $@
 
 # memory check
 check: bsp

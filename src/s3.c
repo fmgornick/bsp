@@ -67,15 +67,10 @@ S3_Init(IVector2 *polygon, usize numVertices, S3 *scene)
 BspStage
 S3_Render(S3 *scene)
 {
-#ifdef WASM
     f32 movementMultiplier = 250.0f;
     f32 rotationMultiplier = 25.0f;
     f32 fovMultiplier = 50.0f;
-#else
-    f32 movementMultiplier = 5.0f;
-    f32 rotationMultiplier = 0.5f;
-    f32 fovMultiplier = 1.0f;
-#endif
+
     if (IsKeyPressed(KEY_H)) scene->helpMenu = !scene->helpMenu;
     else if (HelpButtonClicked(scene->helpButton)) scene->helpMenu = !scene->helpMenu;
     else if (GetKeyPressed() || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) scene->helpMenu = false;

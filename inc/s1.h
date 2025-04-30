@@ -5,8 +5,8 @@
 #include "i32_vector.h"
 #include <stdbool.h>
 
-#define ROWS 36
-#define COLS 64
+#define ROWS 45
+#define COLS 80
 
 #define CELL_WIDTH 20  /* dependent on (WIDTH / COLS) */
 #define CELL_HEIGHT 20 /* dependent on (HEIGHT / ROWS) */

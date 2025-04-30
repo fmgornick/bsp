@@ -14,6 +14,7 @@ main(isize argc, char *argv[])
 
     /* SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT); */
     InitWindow(WIDTH, HEIGHT, "csci 8442 bsp demo");
+    SetTargetFPS(60);
 
     PollInputEvents();
     while (!WindowShouldClose())
