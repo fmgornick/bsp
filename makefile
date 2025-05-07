@@ -1,4 +1,4 @@
-FLAGS=-std=c11 -O3 -Wall -Iinc -I/usr/local/include/raylib
+FLAGS=-std=c11 -O3 -Wall -Iinc -Iinc/raylib
 EMCC_FLAGS=-s USE_GLFW=3 -s ASYNCIFY --shell-file web/shell.html
 SANITIZE=-fsanitize=address
 # SANITIZE=
@@ -9,7 +9,7 @@ WEBOBJS=$(patsubst src/%.c,obj/web_%.o,$(SRCS))
 
 # main executable
 bsp: $(OBJS)
-	clang $(SANITIZE) -o $@ -Iinc $^ -lraylib
+	clang $(SANITIZE) -o $@ -Iinc $^ -Llib -lraylib -framework Cocoa -framework IOKit
 
 # runs main executable on web
 wasm: $(WEBOBJS)
