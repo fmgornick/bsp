@@ -4,215 +4,263 @@
       "/usr/bin/clang",
       "-c",
       "-std=c11",
-      "-g",
+      "-O3",
       "-Wall",
       "-Iinc",
-      "-I/usr/local/include/raylib",
+      "-Iinc/raylib",
       "-fsanitize=address",
-      "-o",
-      "obj/bsp_tree.o",
-      "src/bsp_tree.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/bsp_tree.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/bsp_tree.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-std=c11",
-      "-g",
-      "-Wall",
-      "-Iinc",
-      "-I/usr/local/include/raylib",
-      "-fsanitize=address",
-      "-o",
-      "obj/region.o",
-      "src/region.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/region.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/region.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-std=c11",
-      "-g",
-      "-Wall",
-      "-Iinc",
-      "-I/usr/local/include/raylib",
-      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
       "-o",
       "obj/dcel.o",
       "src/dcel.c"
     ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/dcel.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/dcel.o"
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/dcel.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/dcel.o"
   },
   {
     "arguments": [
       "/usr/bin/clang",
       "-c",
       "-std=c11",
-      "-g",
+      "-O3",
       "-Wall",
       "-Iinc",
-      "-I/usr/local/include/raylib",
+      "-Iinc/raylib",
       "-fsanitize=address",
-      "-o",
-      "obj/f64_vector.o",
-      "src/f64_vector.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/f64_vector.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/f64_vector.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-std=c11",
-      "-g",
-      "-Wall",
-      "-Iinc",
-      "-I/usr/local/include/raylib",
-      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
       "-o",
       "obj/f32_segment.o",
       "src/f32_segment.c"
     ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/f32_segment.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/f32_segment.o"
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/f32_segment.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/f32_segment.o"
   },
   {
     "arguments": [
       "/usr/bin/clang",
       "-c",
       "-std=c11",
-      "-g",
+      "-O3",
       "-Wall",
       "-Iinc",
-      "-I/usr/local/include/raylib",
+      "-Iinc/raylib",
       "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
       "-o",
-      "obj/s2.o",
-      "src/s2.c"
+      "obj/bsp_tree.o",
+      "src/bsp_tree.c"
     ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/s2.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/s2.o"
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/bsp_tree.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/bsp_tree.o"
   },
   {
     "arguments": [
       "/usr/bin/clang",
       "-c",
       "-std=c11",
-      "-g",
+      "-O3",
       "-Wall",
       "-Iinc",
-      "-I/usr/local/include/raylib",
+      "-Iinc/raylib",
       "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/f64_vector.o",
+      "src/f64_vector.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/f64_vector.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/f64_vector.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Iinc",
+      "-Iinc/raylib",
+      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
       "-o",
       "obj/f64_segment.o",
       "src/f64_segment.c"
     ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/f64_segment.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/f64_segment.o"
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/f64_segment.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/f64_segment.o"
   },
   {
     "arguments": [
       "/usr/bin/clang",
       "-c",
       "-std=c11",
-      "-g",
+      "-O3",
       "-Wall",
       "-Iinc",
-      "-I/usr/local/include/raylib",
+      "-Iinc/raylib",
       "-fsanitize=address",
-      "-o",
-      "obj/s1.o",
-      "src/s1.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/s1.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/s1.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-std=c11",
-      "-g",
-      "-Wall",
-      "-Iinc",
-      "-I/usr/local/include/raylib",
-      "-fsanitize=address",
-      "-o",
-      "obj/triangulation.o",
-      "src/triangulation.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/triangulation.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/triangulation.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-std=c11",
-      "-g",
-      "-Wall",
-      "-Iinc",
-      "-I/usr/local/include/raylib",
-      "-fsanitize=address",
-      "-o",
-      "obj/main.o",
-      "src/main.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/main.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/main.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-std=c11",
-      "-g",
-      "-Wall",
-      "-Iinc",
-      "-I/usr/local/include/raylib",
-      "-fsanitize=address",
-      "-o",
-      "obj/s3.o",
-      "src/s3.c"
-    ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/s3.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/s3.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-c",
-      "-std=c11",
-      "-g",
-      "-Wall",
-      "-Iinc",
-      "-I/usr/local/include/raylib",
-      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
       "-o",
       "obj/i32_vector.o",
       "src/i32_vector.c"
     ],
-    "directory": "/Users/Z00B3R5/repos/bsp",
-    "file": "/Users/Z00B3R5/repos/bsp/src/i32_vector.c",
-    "output": "/Users/Z00B3R5/repos/bsp/obj/i32_vector.o"
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/i32_vector.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/i32_vector.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Iinc",
+      "-Iinc/raylib",
+      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/s1.o",
+      "src/s1.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/s1.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/s1.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Iinc",
+      "-Iinc/raylib",
+      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/main.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Iinc",
+      "-Iinc/raylib",
+      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/region.o",
+      "src/region.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/region.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/region.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Iinc",
+      "-Iinc/raylib",
+      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/s2.o",
+      "src/s2.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/s2.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/s2.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Iinc",
+      "-Iinc/raylib",
+      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/s3.o",
+      "src/s3.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/s3.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/s3.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/clang",
+      "-c",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Iinc",
+      "-Iinc/raylib",
+      "-fsanitize=address",
+      "-I",
+      "/opt/homebrew/include",
+      "-I",
+      "/usr/local/include",
+      "-o",
+      "obj/triangulation.o",
+      "src/triangulation.c"
+    ],
+    "directory": "/Users/fmgornick/repos/bsp",
+    "file": "/Users/fmgornick/repos/bsp/src/triangulation.c",
+    "output": "/Users/fmgornick/repos/bsp/obj/triangulation.o"
   }
 ]
